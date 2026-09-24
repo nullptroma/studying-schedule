@@ -1,0 +1,7 @@
+# Typst / report build outputs
+*.pdf
+dist/
+
+# Python
+__pycache__/
+*.pyc

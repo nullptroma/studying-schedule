@@ -1,0 +1,20 @@
+@startuml
+!include _gost-theme.inc.puml
+
+rectangle "report.typ\n(gost.with, include)" as root
+folder "includes/" as inc {
+  file "meta.typ"
+  file "abstract-ru.typ"
+  file "intro.typ"
+  file "ch01.typ / ch02.typ"
+}
+folder "images/" as img
+folder "scripts/" as scr
+file "references.bib" as bib
+
+root --> inc
+root --> bib
+inc --> img : pz-fig
+scr --> root : build.sh
+
+@enduml

@@ -1,0 +1,23 @@
+.callout[data-callout="удалить"] {
+  --callout-color: 192, 0, 0;
+  --callout-icon: lucide-minus-circle;
+}
+
+.callout[data-callout="вопрос"] {
+  --callout-color: 46, 117, 182;
+  --callout-icon: lucide-help-circle;
+}
+
+.callout[data-callout="ответ"] {
+  --callout-color: 84, 130, 53;
+  --callout-icon: lucide-message-circle;
+}
+
+.callout[data-callout="формулировка"] {
+  --callout-color: 31, 78, 121;
+  --callout-icon: lucide-pencil;
+}
+
+.callout[data-callout="формулировка"] .callout-content {
+  font-weight: 700;
+}

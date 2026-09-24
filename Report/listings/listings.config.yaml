@@ -1,0 +1,28 @@
+scan_root: ".."
+
+include_extensions:
+  .py: python
+  .kt: kotlin
+  .kts: kotlin
+  .ts: typescript
+  .js: javascript
+  .typ: text
+
+exclude_dirs:
+  - build
+  - .git
+  - .gradle
+  - node_modules
+  - Report
+
+exclude_globs:
+  - "**/generated/**"
+  - "**/*.png"
+  - "**/*.jpg"
+  - "**/*.pdf"
+
+modules_order:
+  - root
+
+pagebreak_per_module: false
+pagebreak_per_file: false

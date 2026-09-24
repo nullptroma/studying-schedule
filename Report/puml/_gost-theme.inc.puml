@@ -1,0 +1,3 @@
+' Подключать после @startuml: !include _gost-theme.inc.puml
+' Базовые параметры задаёт plantuml-gost.cfg (-config в render_puml.sh).
+' Не используйте title в .puml — подпись «Рисунок N – …» только в Typst (pz-fig).
