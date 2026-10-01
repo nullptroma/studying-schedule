@@ -1,723 +1,113 @@
 // Собран скриптом скрипты/собрать-отчёт-01.py из заметок требований.
-#import "../../includes/common.typ": pz-table
-
-#let удалить(body) = text(fill: rgb("#C00000"), body)
-#let вопрос(body) = text(fill: rgb("#2E75B6"), body)
-#let ответ(body) = text(fill: rgb("#548235"), body)
-#let формулировка(body) = text(fill: rgb("#1F4E79"), weight: "bold", body)
-#let подпись(название) = {
-  set par(first-line-indent: 0pt)
-  block(above: 0.8em, below: 0.2em, text(style: "italic", fill: luma(80), название))
-}
+// Таблицы повторяют сетку сданного docx: альбомный лист, TableGrid, цвета ячеек.
+#set page(
+  flipped: true,
+  margin: (left: 15mm, right: 15mm, top: 14mm, bottom: 14mm),
+)
 
 = Верификация исходных требований
 
-Цветовое кодирование задания сохранено в тексте требований.
+Цветовое кодирование совпадает со сданным отчётом. #text(fill: rgb("#FF0000"))[Красным] выделены фрагменты, которые предлагается удалить или уточнить. #text(fill: rgb("#00B0F0"))[Голубым] записаны вопросы владельцу продукта. #text(fill: rgb("#00A000"))[Зелёным] записаны ответы, предложенные командой: владелец продукта их ещё не подтвердил. #text(fill: rgb("#0000FF"), weight: "bold")[Синим полужирным] дана новая формулировка требования.
 
-#удалить[Красным выделены фрагменты, которые предлагается удалить или уточнить.]
-
-#вопрос[Голубым записаны вопросы владельцу продукта.]
-
-#ответ[Зелёным записаны ответы, предложенные командой. Владелец продукта их ещё не подтвердил.]
-
-#формулировка[Синим полужирным дана новая формулировка требования.]
-
-== REQ-001. Адаптивная вёрстка
-
-Группа: системные характеристики. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Реализуемый веб-сайт обладает адаптивно-отзывчивой версткой, обеспечивающей комфортное отображение информации на различных устройствах, принадлежащих трем основным категориям: компьютер, планшет, смартфон.
-
-Неоднозначный фрагмент: «комфортное отображение».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Что понимается под «комфортным отображением» и при каких размерах области просмотра должна проверяться адаптивность?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Интерфейс должен оставаться пригодным для работы без горизонтальной прокрутки при ширине области просмотра от 360 px. Контрольные диапазоны: 360–767 px, 768–1023 px, 1024 px и более.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен адаптировать компоновку всех страниц к ширине области просмотра 360–767 px, 768–1023 px и 1024 px и более, не допуская горизонтальной прокрутки страницы.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-001. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
+#[
+  #set text(size: 7pt)
+  #set par(justify: false, first-line-indent: (amount: 0pt, all: true), leading: 0.65em, spacing: 0.4em)
+  #table(
+    columns: (1780fr, 3340fr, 3340fr, 3340fr, 3340fr),
+    stroke: 0.5pt,
+    inset: 4pt,
+    align: left + top,
     table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
+      repeat: true,
+      table.cell(fill: rgb("#D9EAF7"), align: left + top)[#text(weight: "bold")[Группа]],
+      table.cell(fill: rgb("#D9EAF7"), align: left + top)[#text(weight: "bold")[Исходное требование (красным – уточняемые фразы)]],
+      table.cell(fill: rgb("#D9EAF7"), align: left + top)[#text(weight: "bold")[Вопрос владельцу продукта]],
+      table.cell(fill: rgb("#D9EAF7"), align: left + top)[#text(weight: "bold")[Ответ владельца продукта (предлагаемый)]],
+      table.cell(fill: rgb("#D9EAF7"), align: left + top)[#text(weight: "bold")[Новая формулировка требования]],
     ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Реализуемый веб-сайт], table.cell(breakable: false)[обладает], table.cell(breakable: false)[адаптивно-отзывчивой версткой], table.cell(breakable: false)[обеспечивающей комфортное отображение информации на различных устройствах, принадлежащих трем основным категориям: компьютер, планшет, смартфон],
+    table.cell(align: left + top, breakable: false)[Системные характеристики], table.cell(align: left + top, breakable: false)[Реализуемый веб-сайт обладает адаптивно-отзывчивой версткой, обеспечивающей #text(fill: rgb("#FF0000"))[комфортное отображение] информации на различных устройствах, принадлежащих трем основным категориям: компьютер, планшет, смартфон.], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Что понимается под «комфортным отображением» и при каких размерах области просмотра должна проверяться адаптивность?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Интерфейс должен оставаться пригодным для работы без горизонтальной прокрутки при ширине области просмотра от 360 px. Контрольные диапазоны: 360–767 px, 768–1023 px, 1024 px и более.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен адаптировать компоновку всех страниц к ширине области просмотра 360–767 px, 768–1023 px и 1024 px и более, не допуская горизонтальной прокрутки страницы.]],
+    table.cell(align: left + top, breakable: false)[Системные характеристики], table.cell(align: left + top, breakable: false)[Разработанный веб-сайт должен являться #text(fill: rgb("#FF0000"))[кроссплатформенным], т. е. должен обладать #text(fill: rgb("#FF0000"))[адекватным отображением контента] #text(fill: rgb("#FF0000"))[вне зависимости от операционной системы клиента].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какие операционные системы и версии необходимо поддерживать и по какому критерию определяется корректность работы?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Windows 10/11, macOS 13 и новее, Android 12 и новее, iOS 16 и новее; на каждой платформе должны быть доступны все пользовательские функции и не должно быть критических дефектов отображения.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен обеспечивать доступность всех пользовательских функций и корректное отображение интерфейса в поддерживаемых браузерах на Windows 10/11, macOS 13 и новее, Android 12 и новее и iOS 16 и новее.]],
+    table.cell(align: left + top, breakable: false)[Системные характеристики], table.cell(align: left + top, breakable: false)[Разработанный веб-сайт должен являться кроссбраузерным, т. е. должен корректно отображаться и функционировать #text(fill: rgb("#FF0000"))[во всех популярных и часто используемых браузерах].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какие именно браузеры и какие версии считаются поддерживаемыми?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Google Chrome, Microsoft Edge, Mozilla Firefox и Safari – текущая и предыдущая стабильные версии на момент приемочного тестирования.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен корректно отображаться и предоставлять все пользовательские функции в текущей и предыдущей стабильных версиях Google Chrome, Microsoft Edge, Mozilla Firefox и Safari.]],
+    table.cell(align: left + top, breakable: false)[Системные характеристики], table.cell(align: left + top, breakable: false)[Веб-сайт должен разрабатываться с использованием #text(fill: rgb("#FF0000"))[современных технологий и стандартов формата], #text(fill: rgb("#FF0000"))[например стандарта W3C], а также с использованием следующего стека: #text(fill: rgb("#FF0000"))[HTML, CSS, JS] (клиентской части).], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какие конкретно технологии, версии стандартов и критерии соответствия W3C требуются для клиентской части?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[HTML5, CSS и JavaScript стандарта ECMAScript 2015 или новее; итоговая HTML-разметка должна проходить проверку W3C Markup Validation Service без ошибок.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен использовать в клиентской части HTML5, CSS и JavaScript стандарта ECMAScript 2015 или новее, а HTML-разметка должна проходить проверку W3C Markup Validation Service без ошибок.]],
+    table.cell(align: left + top, breakable: false)[Атрибуты качества], table.cell(align: left + top, breakable: false)[Скорость отклика сайта должна обеспечивать #text(fill: rgb("#FF0000"))[обработку данных не менее 5Мб/с] на аппаратном обеспечении, эквивалентном следующему: #text(fill: rgb("#FF0000"))[процессор i7, 8 Гб оперативной памяти].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Что требуется измерять: пропускную способность или время отклика? Указанное оборудование относится к серверу или клиенту? При какой нагрузке проводится проверка?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Контролируется время отклика страницы расписания. Не менее 95% запросов должны завершаться не более чем за 2 секунды при 100 одновременных пользователях на тестовом сервере уровня Intel Core i7 и 8 ГБ ОЗУ.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен формировать и возвращать страницу расписания не более чем за 2 секунды для не менее 95% запросов при нагрузке 100 одновременных пользователей на тестовом сервере уровня Intel Core i7 и 8 ГБ ОЗУ.]],
+    table.cell(align: left + top, breakable: false)[Атрибуты качества], table.cell(align: left + top, breakable: false)[Показатель сервиса «#text(fill: rgb("#FF0000"))[Page Speed]» должен находиться #text(fill: rgb("#FF0000"))[в зеленой зоне] #text(fill: rgb("#FF0000"))[для всех основных критериев] анализа веб-сайта, #text(fill: rgb("#FF0000"))[с целью оптимизации скорости, производительности и дальнейшего продвижения].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какой инструмент PageSpeed используется, какие категории проверяются, какой числовой порог соответствует «зеленой зоне» и для каких страниц проводится проверка?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Google PageSpeed Insights / Lighthouse; публичные страницы «Главная» и «Расписание» проверяются в режимах Mobile и Desktop; оценки Performance, Accessibility, Best Practices и SEO должны быть не ниже 90.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен получать в Google Lighthouse не менее 90 баллов по категориям Performance, Accessibility, Best Practices и SEO для публичных страниц «Главная» и «Расписание» в режимах Mobile и Desktop.]],
+    table.cell(align: left + top, breakable: false)[Атрибуты качества], table.cell(align: left + top, breakable: false)[Веб-сайт должен демонстрировать #text(fill: rgb("#FF0000"))[стабильную и производительную работу] #text(fill: rgb("#FF0000"))[с большим потоком пользователей], #text(fill: rgb("#FF0000"))[вне зависимости от вероятных сторонних негативных факторов].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какое число одновременных пользователей считается большим потоком, как измеряется стабильность и какие внешние факторы входят в область ответственности системы?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Нагрузочный тест – 200 одновременных пользователей в течение 30 минут; доля ответов HTTP 5xx не более 1%, серверное приложение не должно аварийно завершаться. Сбои внешней сети и сторонних сервисов не включаются в гарантию.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Веб-сайт должен обслуживать 200 одновременных пользователей в течение 30 минут без аварийного завершения серверного приложения и с долей ответов HTTP 5xx не более 1%.]],
+    table.cell(align: left + top, breakable: false)[Пользовательские требования], table.cell(align: left + top, breakable: false)[Возможность отображения информации на веб-сайте #text(fill: rgb("#FF0000"))[на языке комфортном для основной целевой аудитории] ресурса, в данном случае #text(fill: rgb("#FF0000"))[необходимо использовать русский и английский язык].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Должен ли пользователь самостоятельно переключать язык и какие элементы сайта необходимо переводить?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Пользователь вручную выбирает русский или английский язык; переводятся элементы навигации, подписи полей, кнопки и системные сообщения.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Пользователь должен иметь возможность выбрать русский или английский язык для отображения элементов навигации, подписей полей, кнопок и системных сообщений веб-сайта.]],
+    table.cell(align: left + top, breakable: false)[Пользовательские требования], table.cell(align: left + top, breakable: false)[Возможность #text(fill: rgb("#FF0000"))[быстрого] просмотра #text(fill: rgb("#FF0000"))[необходимой информации].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какая именно информация должна быть доступна и по какому измеримому критерию просмотр считается быстрым?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Основная информация – расписание выбранной учебной группы на выбранную дату; пользователь должен получать его не более чем за три действия интерфейса от главной страницы.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Пользователь должен получать расписание выбранной учебной группы на выбранную дату не более чем за три действия интерфейса от главной страницы.]],
+    table.cell(align: left + top, breakable: false)[Пользовательские требования], table.cell(align: left + top, breakable: false)[Возможность получения #text(fill: rgb("#FF0000"))[какой-либо дополнительной информации] о размещении учебных корпусов, аудиторий и #text(fill: rgb("#FF0000"))[административной информации] об образовательном учреждении.], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Какой конкретно состав дополнительной и административной информации должен быть доступен пользователю?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Название и адрес учебного корпуса, номер аудитории, а также контактный телефон и адрес электронной почты администрации образовательного учреждения.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Пользователь должен иметь возможность просматривать название и адрес учебного корпуса, номер аудитории, контактный телефон и адрес электронной почты администрации образовательного учреждения.]],
+    table.cell(align: left + top, breakable: false)[Ограничения], table.cell(align: left + top, breakable: false)[Редактирование и добавление информации касательно расписаний занятий допускается только #text(fill: rgb("#FF0000"))[авторизированными пользователями], #text(fill: rgb("#FF0000"))[обладающими правами «Администратора»].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Кто именно может добавлять и редактировать расписание и что происходит с пользователями без административных прав?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Добавление и редактирование доступны только после аутентификации пользователю с ролью «Администратор»; остальные пользователи имеют только доступ к просмотру опубликованной информации.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Система должна разрешать добавление и редактирование информации о расписании только аутентифицированному пользователю с ролью «Администратор».]],
+    table.cell(align: left + top, breakable: false)[Ограничения], table.cell(align: left + top, breakable: false)[Разрабатываемое приложение #text(fill: rgb("#FF0000"))[должны быть защищено] и #text(fill: rgb("#FF0000"))[функционировать в соответствии HTTPS протоколу безопасности передачи данных].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Должен ли весь обмен данными выполняться по HTTPS, какая минимальная версия TLS требуется и как обрабатываются обращения по HTTP?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Весь клиент-серверный обмен выполняется по HTTPS с TLS 1.2 или новее; обращения по HTTP перенаправляются на HTTPS.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Система должна передавать все данные между клиентом и сервером по HTTPS с использованием TLS 1.2 или новее и перенаправлять обращения по HTTP на HTTPS.]],
+    table.cell(align: left + top, breakable: false)[Заказчики], table.cell(align: left + top, breakable: false)[Сервис решает #text(fill: rgb("#FF0000"))[проблемы] #text(fill: rgb("#FF0000"))[заказчика].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[Кто заказчик и чьи проблемы решает сервис?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Университеты, школы, в том числе онлайн-школы, и колледжи.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Система должна предоставлять актуальное расписание занятий университетам, школам, в том числе онлайн-школам, и колледжам.]],
+    table.cell(align: left + top, breakable: false)[Ограничения], table.cell(align: left + top, breakable: false)[Сервис предоставляется заказчику #text(fill: rgb("#FF0000"))[в виде лицензии на платформу поставщика или в виде сайта, который заказчик ставит у себя].], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00B0F0"))[В каком виде предоставляется сервис: лицензия на использование платформы поставщика или сайт, который заказчик ставит у себя?]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#00A000"))[Self-host: сайт, который заказчик разворачивает у себя.]], table.cell(align: left + top, breakable: false)[#text(fill: rgb("#0000FF"), weight: "bold")[Заказчик должен устанавливать сайт сервиса на своей площадке. Поставка в виде лицензии на платформу, размещённую у поставщика, не используется.]],
   )
 ]
 
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-001. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
+== Табличное представление требований, шаг 1
+
+#[
+  #set text(size: 8pt)
+  #set par(justify: false, first-line-indent: (amount: 0pt, all: true), leading: 0.65em, spacing: 0.4em)
+  #table(
+    columns: (1660fr, 3367fr, 2128fr, 3066fr, 4917fr),
+    stroke: 0.5pt,
+    inset: 4pt,
+    align: left + top,
     table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
+      repeat: true,
+      table.cell(fill: rgb("#E2F0D9"), align: left + top)[#text(weight: "bold")[Словосочетание вначале предложения]],
+      table.cell(fill: rgb("#E2F0D9"), align: left + top)[#text(weight: "bold")[Подлежащее]],
+      table.cell(fill: rgb("#E2F0D9"), align: left + top)[#text(weight: "bold")[Сказуемое]],
+      table.cell(fill: rgb("#E2F0D9"), align: left + top)[#text(weight: "bold")[Дополнение]],
+      table.cell(fill: rgb("#E2F0D9"), align: left + top)[#text(weight: "bold")[Словосочетание в конце предложения]],
     ),
-    table.cell(breakable: false)[При ширине области просмотра 360 px и более], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[адаптирует], table.cell(breakable: false)[компоновку всех страниц], table.cell(breakable: false)[к диапазонам 360–767 px, 768–1023 px и 1024 px и более без горизонтальной прокрутки страницы],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Реализуемый веб-сайт], table.cell(align: left + top, breakable: false)[обладает], table.cell(align: left + top, breakable: false)[адаптивно-отзывчивой версткой], table.cell(align: left + top, breakable: false)[обеспечивающей комфортное отображение информации на различных устройствах, принадлежащих трем основным категориям: компьютер, планшет, смартфон],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Разработанный веб-сайт], table.cell(align: left + top, breakable: false)[должен являться], table.cell(align: left + top, breakable: false)[кроссплатформенным], table.cell(align: left + top, breakable: false)[т. е. должен обладать адекватным отображением контента вне зависимости от операционной системы клиента],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Разработанный веб-сайт], table.cell(align: left + top, breakable: false)[должен являться], table.cell(align: left + top, breakable: false)[кроссбраузерным], table.cell(align: left + top, breakable: false)[т. е. должен корректно отображаться и функционировать во всех популярных и часто используемых браузерах],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[должен разрабатываться], table.cell(align: left + top, breakable: false)[с использованием современных технологий и стандартов формата], table.cell(align: left + top, breakable: false)[например стандарта W3C, а также с использованием следующего стека: HTML, CSS, JS (клиентской части)],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Скорость отклика сайта], table.cell(align: left + top, breakable: false)[должна обеспечивать], table.cell(align: left + top, breakable: false)[обработку данных не менее 5Мб/с], table.cell(align: left + top, breakable: false)[на аппаратном обеспечении, эквивалентном следующему: процессор i7, 8 Гб оперативной памяти],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Показатель сервиса «Page Speed»], table.cell(align: left + top, breakable: false)[должен находиться], table.cell(align: left + top, breakable: false)[в зеленой зоне], table.cell(align: left + top, breakable: false)[для всех основных критериев анализа веб-сайта, с целью оптимизации скорости, производительности и дальнейшего продвижения],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[должен демонстрировать], table.cell(align: left + top, breakable: false)[стабильную и производительную работу], table.cell(align: left + top, breakable: false)[с большим потоком пользователей, вне зависимости от вероятных сторонних негативных факторов],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Возможность отображения информации на веб-сайте], table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[на языке комфортном для основной целевой аудитории ресурса; в данном случае необходимо использовать русский и английский язык],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Возможность быстрого просмотра], table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[необходимой информации], table.cell(align: left + top, breakable: false)[],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Возможность получения], table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[какой-либо дополнительной информации], table.cell(align: left + top, breakable: false)[о размещении учебных корпусов, аудиторий и административной информации об образовательном учреждении],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Редактирование и добавление информации касательно расписаний занятий], table.cell(align: left + top, breakable: false)[допускается], table.cell(align: left + top, breakable: false)[авторизированными пользователями], table.cell(align: left + top, breakable: false)[обладающими правами «Администратора»],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Разрабатываемое приложение], table.cell(align: left + top, breakable: false)[должны быть защищено и функционировать], table.cell(align: left + top, breakable: false)[в соответствии HTTPS протоколу безопасности передачи данных], table.cell(align: left + top, breakable: false)[],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Сервис], table.cell(align: left + top, breakable: false)[решает], table.cell(align: left + top, breakable: false)[проблемы заказчика], table.cell(align: left + top, breakable: false)[],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Сервис], table.cell(align: left + top, breakable: false)[предоставляется], table.cell(align: left + top, breakable: false)[заказчику], table.cell(align: left + top, breakable: false)[в виде лицензии на платформу поставщика или в виде сайта, который заказчик ставит у себя],
   )
 ]
 
-== REQ-002. Кроссплатформенность
+== Табличное представление требований, шаг 2
 
-Группа: системные характеристики. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Разработанный веб-сайт должен являться кроссплатформенным, т. е. должен обладать адекватным отображением контента вне зависимости от операционной системы клиента.
-
-Неоднозначный фрагмент: «кроссплатформенным», «адекватным отображением контента», «вне зависимости от операционной системы клиента».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какие операционные системы и версии необходимо поддерживать и по какому критерию определяется корректность работы?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Windows 10/11, macOS 13 и новее, Android 12 и новее, iOS 16 и новее; на каждой платформе должны быть доступны все пользовательские функции и не должно быть критических дефектов отображения.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен обеспечивать доступность всех пользовательских функций и корректное отображение интерфейса в поддерживаемых браузерах на Windows 10/11, macOS 13 и новее, Android 12 и новее и iOS 16 и новее.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-002. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
+#[
+  #set text(size: 8pt)
+  #set par(justify: false, first-line-indent: (amount: 0pt, all: true), leading: 0.65em, spacing: 0.4em)
+  #table(
+    columns: (3536fr, 1639fr, 2775fr, 3921fr, 3267fr),
+    stroke: 0.5pt,
+    inset: 4pt,
+    align: left + top,
     table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
+      repeat: true,
+      table.cell(fill: rgb("#FFF2CC"), align: left + top)[#text(weight: "bold")[Словосочетание вначале предложения]],
+      table.cell(fill: rgb("#FFF2CC"), align: left + top)[#text(weight: "bold")[Подлежащее]],
+      table.cell(fill: rgb("#FFF2CC"), align: left + top)[#text(weight: "bold")[Сказуемое]],
+      table.cell(fill: rgb("#FFF2CC"), align: left + top)[#text(weight: "bold")[Дополнение]],
+      table.cell(fill: rgb("#FFF2CC"), align: left + top)[#text(weight: "bold")[Словосочетание в конце предложения]],
     ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Разработанный веб-сайт], table.cell(breakable: false)[должен являться], table.cell(breakable: false)[кроссплатформенным], table.cell(breakable: false)[т. е. должен обладать адекватным отображением контента вне зависимости от операционной системы клиента],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-002. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[На поддерживаемых операционных системах], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[обеспечивает], table.cell(breakable: false)[доступность пользовательских функций и корректное отображение интерфейса], table.cell(breakable: false)[на Windows 10/11, macOS 13+, Android 12+ и iOS 16+],
-  )
-]
-
-== REQ-003. Кроссбраузерность
-
-Группа: системные характеристики. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Разработанный веб-сайт должен являться кроссбраузерным, т. е. должен корректно отображаться и функционировать во всех популярных и часто используемых браузерах.
-
-Неоднозначный фрагмент: «во всех популярных и часто используемых браузерах».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какие именно браузеры и какие версии считаются поддерживаемыми?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Google Chrome, Microsoft Edge, Mozilla Firefox и Safari – текущая и предыдущая стабильные версии на момент приемочного тестирования.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен корректно отображаться и предоставлять все пользовательские функции в текущей и предыдущей стабильных версиях Google Chrome, Microsoft Edge, Mozilla Firefox и Safari.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-003. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Разработанный веб-сайт], table.cell(breakable: false)[должен являться], table.cell(breakable: false)[кроссбраузерным], table.cell(breakable: false)[т. е. должен корректно отображаться и функционировать во всех популярных и часто используемых браузерах],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-003. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[В поддерживаемых браузерах], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[отображает и предоставляет], table.cell(breakable: false)[интерфейс и пользовательские функции], table.cell(breakable: false)[в текущей и предыдущей стабильных версиях Chrome, Edge, Firefox и Safari],
-  )
-]
-
-== REQ-004. Клиентский стек
-
-Группа: системные характеристики. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Веб-сайт должен разрабатываться с использованием современных технологий и стандартов формата, например стандарта W3C, а также с использованием следующего стека: HTML, CSS, JS (клиентской части).
-
-Неоднозначный фрагмент: «современных технологий и стандартов формата», «например стандарта W3C», «HTML, CSS, JS».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какие конкретно технологии, версии стандартов и критерии соответствия W3C требуются для клиентской части?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-HTML5, CSS и JavaScript стандарта ECMAScript 2015 или новее; итоговая HTML-разметка должна проходить проверку W3C Markup Validation Service без ошибок.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен использовать в клиентской части HTML5, CSS и JavaScript стандарта ECMAScript 2015 или новее, а HTML-разметка должна проходить проверку W3C Markup Validation Service без ошибок.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-004. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[должен разрабатываться], table.cell(breakable: false)[с использованием современных технологий и стандартов формата], table.cell(breakable: false)[например стандарта W3C, а также с использованием следующего стека: HTML, CSS, JS (клиентской части)],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-004. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[В клиентской части], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[использует], table.cell(breakable: false)[HTML5, CSS и JavaScript стандарта ECMAScript 2015 или новее], table.cell(breakable: false)[с HTML-разметкой, проходящей проверку W3C Markup Validation Service без ошибок],
-  )
-]
-
-== REQ-005. Время отклика
-
-Группа: атрибуты качества. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Скорость отклика сайта должна обеспечивать обработку данных не менее 5Мб/с на аппаратном обеспечении, эквивалентном следующему: процессор i7, 8 Гб оперативной памяти.
-
-Неоднозначный фрагмент: «скорость отклика», «обработку данных не менее 5Мб/с», «процессор i7, 8 Гб оперативной памяти».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Что требуется измерять: пропускную способность или время отклика? Указанное оборудование относится к серверу или клиенту? При какой нагрузке проводится проверка?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Контролируется время отклика страницы расписания. Не менее 95% запросов должны завершаться не более чем за 2 секунды при 100 одновременных пользователях на тестовом сервере уровня Intel Core i7 и 8 ГБ ОЗУ.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен формировать и возвращать страницу расписания не более чем за 2 секунды для не менее 95% запросов при нагрузке 100 одновременных пользователей на тестовом сервере уровня Intel Core i7 и 8 ГБ ОЗУ.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-005. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Скорость отклика сайта], table.cell(breakable: false)[должна обеспечивать], table.cell(breakable: false)[обработку данных не менее 5Мб/с], table.cell(breakable: false)[на аппаратном обеспечении, эквивалентном следующему: процессор i7, 8 Гб оперативной памяти],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-005. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При нагрузке 100 одновременных пользователей], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[формирует и возвращает], table.cell(breakable: false)[страницу расписания], table.cell(breakable: false)[не более чем за 2 секунды для не менее 95% запросов на заданном тестовом сервере],
-  )
-]
-
-== REQ-006. Оценки Google Lighthouse
-
-Группа: атрибуты качества. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Показатель сервиса «Page Speed» должен находиться в зеленой зоне для всех основных критериев анализа веб-сайта, с целью оптимизации скорости, производительности и дальнейшего продвижения.
-
-Неоднозначный фрагмент: «Page Speed», «в зеленой зоне», «для всех основных критериев», «с целью оптимизации скорости, производительности и дальнейшего продвижения».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какой инструмент PageSpeed используется, какие категории проверяются, какой числовой порог соответствует «зеленой зоне» и для каких страниц проводится проверка?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Google PageSpeed Insights / Lighthouse; публичные страницы «Главная» и «Расписание» проверяются в режимах Mobile и Desktop; оценки Performance, Accessibility, Best Practices и SEO должны быть не ниже 90.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен получать в Google Lighthouse не менее 90 баллов по категориям Performance, Accessibility, Best Practices и SEO для публичных страниц «Главная» и «Расписание» в режимах Mobile и Desktop.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-006. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Показатель сервиса «Page Speed»], table.cell(breakable: false)[должен находиться], table.cell(breakable: false)[в зеленой зоне], table.cell(breakable: false)[для всех основных критериев анализа веб-сайта, с целью оптимизации скорости, производительности и дальнейшего продвижения],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-006. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При проверке публичных страниц «Главная» и «Расписание»], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[получает], table.cell(breakable: false)[не менее 90 баллов в Google Lighthouse], table.cell(breakable: false)[по категориям Performance, Accessibility, Best Practices и SEO в режимах Mobile и Desktop],
-  )
-]
-
-== REQ-007. Работа под нагрузкой
-
-Группа: атрибуты качества. Актор: Веб-сайт.
-
-#подпись[Исходная формулировка]
-#удалить[
-Веб-сайт должен демонстрировать стабильную и производительную работу с большим потоком пользователей, вне зависимости от вероятных сторонних негативных факторов.
-
-Неоднозначный фрагмент: «стабильную и производительную работу», «с большим потоком пользователей», «вне зависимости от вероятных сторонних негативных факторов».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какое число одновременных пользователей считается большим потоком, как измеряется стабильность и какие внешние факторы входят в область ответственности системы?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Нагрузочный тест – 200 одновременных пользователей в течение 30 минут; доля ответов HTTP 5xx не более 1%, серверное приложение не должно аварийно завершаться. Сбои внешней сети и сторонних сервисов не включаются в гарантию.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Веб-сайт должен обслуживать 200 одновременных пользователей в течение 30 минут без аварийного завершения серверного приложения и с долей ответов HTTP 5xx не более 1%.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-007. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[должен демонстрировать], table.cell(breakable: false)[стабильную и производительную работу], table.cell(breakable: false)[с большим потоком пользователей, вне зависимости от вероятных сторонних негативных факторов],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-007. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При нагрузочном тестировании в течение 30 минут], table.cell(breakable: false)[Веб-сайт], table.cell(breakable: false)[обслуживает], table.cell(breakable: false)[200 одновременных пользователей], table.cell(breakable: false)[без аварийного завершения серверного приложения и с долей ответов HTTP 5xx не более 1%],
-  )
-]
-
-== REQ-008. Язык интерфейса
-
-Группа: пользовательские требования. Актор: Пользователь.
-
-#подпись[Исходная формулировка]
-#удалить[
-Возможность отображения информации на веб-сайте на языке комфортном для основной целевой аудитории ресурса, в данном случае необходимо использовать русский и английский язык.
-
-Неоднозначный фрагмент: «на языке комфортном для основной целевой аудитории», «необходимо использовать русский и английский язык».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Должен ли пользователь самостоятельно переключать язык и какие элементы сайта необходимо переводить?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Пользователь вручную выбирает русский или английский язык; переводятся элементы навигации, подписи полей, кнопки и системные сообщения.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Пользователь должен иметь возможность выбрать русский или английский язык для отображения элементов навигации, подписей полей, кнопок и системных сообщений веб-сайта.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-008. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Возможность отображения информации на веб-сайте], table.cell(breakable: false)[], table.cell(breakable: false)[], table.cell(breakable: false)[на языке комфортном для основной целевой аудитории ресурса; в данном случае необходимо использовать русский и английский язык],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-008. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При работе с интерфейсом], table.cell(breakable: false)[Пользователь], table.cell(breakable: false)[выбирает], table.cell(breakable: false)[русский или английский язык], table.cell(breakable: false)[для отображения элементов навигации, подписей полей, кнопок и системных сообщений],
-  )
-]
-
-== REQ-009. Просмотр расписания
-
-Группа: пользовательские требования. Актор: Пользователь.
-
-#подпись[Исходная формулировка]
-#удалить[
-Возможность быстрого просмотра необходимой информации.
-
-Неоднозначный фрагмент: «быстрого» просмотра, «необходимой информации».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какая именно информация должна быть доступна и по какому измеримому критерию просмотр считается быстрым?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Основная информация – расписание выбранной учебной группы на выбранную дату; пользователь должен получать его не более чем за три действия интерфейса от главной страницы.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Пользователь должен получать расписание выбранной учебной группы на выбранную дату не более чем за три действия интерфейса от главной страницы.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-009. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Возможность быстрого просмотра], table.cell(breakable: false)[], table.cell(breakable: false)[необходимой информации], table.cell(breakable: false)[],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-009. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[От главной страницы], table.cell(breakable: false)[Пользователь], table.cell(breakable: false)[получает], table.cell(breakable: false)[расписание выбранной учебной группы на выбранную дату], table.cell(breakable: false)[не более чем за три действия интерфейса],
-  )
-]
-
-== REQ-010. Справочные сведения
-
-Группа: пользовательские требования. Актор: Пользователь.
-
-#подпись[Исходная формулировка]
-#удалить[
-Возможность получения какой-либо дополнительной информации о размещении учебных корпусов, аудиторий и административной информации об образовательном учреждении.
-
-Неоднозначный фрагмент: «какой-либо дополнительной информации», «административной информации».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Какой конкретно состав дополнительной и административной информации должен быть доступен пользователю?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Название и адрес учебного корпуса, номер аудитории, а также контактный телефон и адрес электронной почты администрации образовательного учреждения.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Пользователь должен иметь возможность просматривать название и адрес учебного корпуса, номер аудитории, контактный телефон и адрес электронной почты администрации образовательного учреждения.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-010. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Возможность получения], table.cell(breakable: false)[], table.cell(breakable: false)[какой-либо дополнительной информации], table.cell(breakable: false)[о размещении учебных корпусов, аудиторий и административной информации об образовательном учреждении],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-010. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При просмотре справочной информации], table.cell(breakable: false)[Пользователь], table.cell(breakable: false)[просматривает], table.cell(breakable: false)[название и адрес учебного корпуса, номер аудитории, телефон и электронную почту администрации], table.cell(breakable: false)[в веб-сайте],
-  )
-]
-
-== REQ-011. Права администратора
-
-Группа: ограничения. Актор: Администратор.
-
-#подпись[Исходная формулировка]
-#удалить[
-Редактирование и добавление информации касательно расписаний занятий допускается только авторизированными пользователями, обладающими правами «Администратора».
-
-Неоднозначный фрагмент: «авторизированными пользователями», «обладающими правами „Администратора“».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Кто именно может добавлять и редактировать расписание и что происходит с пользователями без административных прав?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Добавление и редактирование доступны только после аутентификации пользователю с ролью «Администратор»; остальные пользователи имеют только доступ к просмотру опубликованной информации.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Система должна разрешать добавление и редактирование информации о расписании только аутентифицированному пользователю с ролью «Администратор».
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-011. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Редактирование и добавление информации касательно расписаний занятий], table.cell(breakable: false)[допускается], table.cell(breakable: false)[авторизированными пользователями], table.cell(breakable: false)[обладающими правами «Администратора»],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-011. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[После успешной аутентификации], table.cell(breakable: false)[Пользователь с ролью «Администратор»], table.cell(breakable: false)[добавляет и редактирует], table.cell(breakable: false)[информацию о расписании], table.cell(breakable: false)[при наличии административных прав],
-  )
-]
-
-== REQ-012. Передача по HTTPS
-
-Группа: ограничения. Актор: Система.
-
-#подпись[Исходная формулировка]
-#удалить[
-Разрабатываемое приложение должны быть защищено и функционировать в соответствии HTTPS протоколу безопасности передачи данных.
-
-Неоднозначный фрагмент: «должны быть защищено», «функционировать в соответствии HTTPS протоколу безопасности передачи данных».
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Должен ли весь обмен данными выполняться по HTTPS, какая минимальная версия TLS требуется и как обрабатываются обращения по HTTP?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Весь клиент-серверный обмен выполняется по HTTPS с TLS 1.2 или новее; обращения по HTTP перенаправляются на HTTPS.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Система должна передавать все данные между клиентом и сервером по HTTPS с использованием TLS 1.2 или новее и перенаправлять обращения по HTTP на HTTPS.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-012. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Разрабатываемое приложение], table.cell(breakable: false)[должны быть защищено и функционировать], table.cell(breakable: false)[в соответствии HTTPS протоколу безопасности передачи данных], table.cell(breakable: false)[],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-012. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При любом клиент-серверном обмене], table.cell(breakable: false)[Система], table.cell(breakable: false)[передает], table.cell(breakable: false)[данные между клиентом и сервером], table.cell(breakable: false)[по HTTPS с TLS 1.2 или новее и перенаправляет обращения по HTTP на HTTPS],
-  )
-]
-
-== REQ-013. Заказчики
-
-Группа: заказчики. Актор: Система.
-
-#подпись[Исходная формулировка]
-#удалить[
-Сервис решает проблемы заказчика.
-
-Неоднозначный фрагмент: «заказчика», «проблемы». Не названы организации и задача, которую сервис для них закрывает.
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-Кто заказчик и чьи проблемы решает сервис?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Университеты, школы, в том числе онлайн-школы, и колледжи.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Система должна предоставлять актуальное расписание занятий университетам, школам, в том числе онлайн-школам, и колледжам.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-013. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Сервис], table.cell(breakable: false)[решает], table.cell(breakable: false)[проблемы заказчика], table.cell(breakable: false)[],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-013. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Система], table.cell(breakable: false)[предоставляет], table.cell(breakable: false)[актуальное расписание занятий], table.cell(breakable: false)[университетам, школам, в том числе онлайн-школам, и колледжам],
-  )
-]
-
-== REQ-014. Поставка self-host
-
-Группа: ограничения. Актор: Заказчик.
-
-#подпись[Исходная формулировка]
-#удалить[
-Сервис предоставляется заказчику в виде лицензии на платформу поставщика или в виде сайта, который заказчик ставит у себя.
-
-Неоднозначный фрагмент: «в виде лицензии на платформу поставщика или в виде сайта, который заказчик ставит у себя». Способ поставки не выбран.
-]
-
-#подпись[Вопрос владельцу продукта]
-#вопрос[
-В каком виде предоставляется сервис: лицензия на использование платформы поставщика или сайт, который заказчик ставит у себя?
-]
-
-#подпись[Ответ владельца продукта, предложенный командой]
-#ответ[
-Self-host: сайт, который заказчик разворачивает у себя.
-]
-
-#подпись[Новая формулировка]
-#формулировка[
-Заказчик должен устанавливать сайт сервиса на своей площадке. Поставка в виде лицензии на платформу, размещённую у поставщика, не используется.
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-014. Шаг 1, исходное предложение],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[], table.cell(breakable: false)[Сервис], table.cell(breakable: false)[предоставляется], table.cell(breakable: false)[заказчику], table.cell(breakable: false)[в виде лицензии на платформу поставщика или в виде сайта, который заказчик ставит у себя],
-  )
-]
-
-#block(breakable: false)[
-  #set text(size: 9pt)
-  #pz-table(
-    [REQ-014. Шаг 2, активный залог],
-    (1fr, 1fr, 1fr, 1fr, 1fr),
-    table.header(
-      [Словосочетание вначале предложения], [Подлежащее], [Сказуемое], [Дополнение], [Словосочетание в конце предложения],
-    ),
-    table.cell(breakable: false)[При поставке], table.cell(breakable: false)[Заказчик], table.cell(breakable: false)[устанавливает], table.cell(breakable: false)[сайт сервиса], table.cell(breakable: false)[на своей площадке, без лицензии на платформу у поставщика],
+    table.cell(align: left + top, breakable: false)[При ширине области просмотра 360 px и более], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[адаптирует], table.cell(align: left + top, breakable: false)[компоновку всех страниц], table.cell(align: left + top, breakable: false)[к диапазонам 360–767 px, 768–1023 px и 1024 px и более без горизонтальной прокрутки страницы],
+    table.cell(align: left + top, breakable: false)[На поддерживаемых операционных системах], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[обеспечивает], table.cell(align: left + top, breakable: false)[доступность пользовательских функций и корректное отображение интерфейса], table.cell(align: left + top, breakable: false)[на Windows 10/11, macOS 13+, Android 12+ и iOS 16+],
+    table.cell(align: left + top, breakable: false)[В поддерживаемых браузерах], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[отображает и предоставляет], table.cell(align: left + top, breakable: false)[интерфейс и пользовательские функции], table.cell(align: left + top, breakable: false)[в текущей и предыдущей стабильных версиях Chrome, Edge, Firefox и Safari],
+    table.cell(align: left + top, breakable: false)[В клиентской части], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[использует], table.cell(align: left + top, breakable: false)[HTML5, CSS и JavaScript стандарта ECMAScript 2015 или новее], table.cell(align: left + top, breakable: false)[с HTML-разметкой, проходящей проверку W3C Markup Validation Service без ошибок],
+    table.cell(align: left + top, breakable: false)[При нагрузке 100 одновременных пользователей], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[формирует и возвращает], table.cell(align: left + top, breakable: false)[страницу расписания], table.cell(align: left + top, breakable: false)[не более чем за 2 секунды для не менее 95% запросов на заданном тестовом сервере],
+    table.cell(align: left + top, breakable: false)[При проверке публичных страниц «Главная» и «Расписание»], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[получает], table.cell(align: left + top, breakable: false)[не менее 90 баллов в Google Lighthouse], table.cell(align: left + top, breakable: false)[по категориям Performance, Accessibility, Best Practices и SEO в режимах Mobile и Desktop],
+    table.cell(align: left + top, breakable: false)[При нагрузочном тестировании в течение 30 минут], table.cell(align: left + top, breakable: false)[Веб-сайт], table.cell(align: left + top, breakable: false)[обслуживает], table.cell(align: left + top, breakable: false)[200 одновременных пользователей], table.cell(align: left + top, breakable: false)[без аварийного завершения серверного приложения и с долей ответов HTTP 5xx не более 1%],
+    table.cell(align: left + top, breakable: false)[При работе с интерфейсом], table.cell(align: left + top, breakable: false)[Пользователь], table.cell(align: left + top, breakable: false)[выбирает], table.cell(align: left + top, breakable: false)[русский или английский язык], table.cell(align: left + top, breakable: false)[для отображения элементов навигации, подписей полей, кнопок и системных сообщений],
+    table.cell(align: left + top, breakable: false)[От главной страницы], table.cell(align: left + top, breakable: false)[Пользователь], table.cell(align: left + top, breakable: false)[получает], table.cell(align: left + top, breakable: false)[расписание выбранной учебной группы на выбранную дату], table.cell(align: left + top, breakable: false)[не более чем за три действия интерфейса],
+    table.cell(align: left + top, breakable: false)[При просмотре справочной информации], table.cell(align: left + top, breakable: false)[Пользователь], table.cell(align: left + top, breakable: false)[просматривает], table.cell(align: left + top, breakable: false)[название и адрес учебного корпуса, номер аудитории, телефон и электронную почту администрации], table.cell(align: left + top, breakable: false)[в веб-сайте],
+    table.cell(align: left + top, breakable: false)[После успешной аутентификации], table.cell(align: left + top, breakable: false)[Пользователь с ролью «Администратор»], table.cell(align: left + top, breakable: false)[добавляет и редактирует], table.cell(align: left + top, breakable: false)[информацию о расписании], table.cell(align: left + top, breakable: false)[при наличии административных прав],
+    table.cell(align: left + top, breakable: false)[При любом клиент-серверном обмене], table.cell(align: left + top, breakable: false)[Система], table.cell(align: left + top, breakable: false)[передает], table.cell(align: left + top, breakable: false)[данные между клиентом и сервером], table.cell(align: left + top, breakable: false)[по HTTPS с TLS 1.2 или новее и перенаправляет обращения по HTTP на HTTPS],
+    table.cell(align: left + top, breakable: false)[], table.cell(align: left + top, breakable: false)[Система], table.cell(align: left + top, breakable: false)[предоставляет], table.cell(align: left + top, breakable: false)[актуальное расписание занятий], table.cell(align: left + top, breakable: false)[университетам, школам, в том числе онлайн-школам, и колледжам],
+    table.cell(align: left + top, breakable: false)[При поставке], table.cell(align: left + top, breakable: false)[Заказчик], table.cell(align: left + top, breakable: false)[устанавливает], table.cell(align: left + top, breakable: false)[сайт сервиса], table.cell(align: left + top, breakable: false)[на своей площадке, без лицензии на платформу у поставщика],
   )
 ]

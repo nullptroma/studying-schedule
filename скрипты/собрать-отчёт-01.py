@@ -133,36 +133,145 @@ def blocks(markdown: str) -> str:
     return "\n".join(output).strip()
 
 
-def content_block(markdown: str) -> str:
-    return "[\n" + blocks(markdown) + "\n]"
+RED = "#FF0000"
+QUESTION = "#00B0F0"
+ANSWER = "#00A000"
+FORMULATION = "#0000FF"
+
+# Ширины колонок из сданного docx, twip. На альбомном A4 с полями 15 мм это та же сетка.
+VERIFY_WIDTHS = (1780, 3340, 3340, 3340, 3340)
+STEP1_WIDTHS = (1660, 3367, 2128, 3066, 4917)
+STEP2_WIDTHS = (3536, 1639, 2775, 3921, 3267)
+ACTOR_WIDTHS = (3707, 11431)
+
+VERIFY_HEADERS = (
+    "Группа",
+    "Исходное требование (красным – уточняемые фразы)",
+    "Вопрос владельцу продукта",
+    "Ответ владельца продукта (предлагаемый)",
+    "Новая формулировка требования",
+)
+STEP_HEADERS = (
+    "Словосочетание вначале предложения",
+    "Подлежащее",
+    "Сказуемое",
+    "Дополнение",
+    "Словосочетание в конце предложения",
+)
+
+LANDSCAPE = """#set page(
+  flipped: true,
+  margin: (left: 15mm, right: 15mm, top: 14mm, bottom: 14mm),
+)"""
 
 
-def table_block(section: str, caption: str, path: Path) -> str:
-    rows = markdown_table(section, path)
-    header, data = rows[0], rows[1:]
-    width = len(header)
-    columns = ", ".join(["1fr"] * width)
+def paragraphs(text: str) -> list[str]:
+    return [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]
+
+
+def plain_text(text: str) -> str:
+    return " ".join(" ".join(part.split()) for part in paragraphs(text))
+
+
+def quote_variants(phrase: str) -> list[str]:
+    variants = [phrase]
+    swapped = phrase.replace("„", "«").replace("“", "»")
+    if swapped != phrase:
+        variants.append(swapped)
+    return variants
+
+
+def highlight(sentence: str, phrases: list[str]) -> str:
+    spans: list[tuple[int, int]] = []
+    occupied = [False] * len(sentence)
+    for phrase in sorted(phrases, key=len, reverse=True):
+        found: tuple[int, int] | None = None
+        for variant in quote_variants(phrase):
+            start = 0
+            while True:
+                index = sentence.find(variant, start)
+                if index < 0:
+                    break
+                end = index + len(variant)
+                if not any(occupied[index:end]):
+                    found = (index, end)
+                    break
+                start = index + 1
+            if found:
+                break
+        if found:
+            begin, end = found
+            spans.append(found)
+            for index in range(begin, end):
+                occupied[index] = True
+    spans.sort()
+    parts: list[str] = []
+    cursor = 0
+    for begin, end in spans:
+        if cursor < begin:
+            parts.append(escape(sentence[cursor:begin]))
+        parts.append(f'#text(fill: rgb("{RED}"))[{escape(sentence[begin:end])}]')
+        cursor = end
+    if cursor < len(sentence):
+        parts.append(escape(sentence[cursor:]))
+    return "".join(parts)
+
+
+def colored(text: str, color: str, bold: bool = False) -> str:
+    weight = ', weight: "bold"' if bold else ""
+    return f'#text(fill: rgb("{color}"){weight})[{escape(text)}]'
+
+
+def original_cell(section: str, path: Path) -> str:
+    raw = callout(section, "удалить", path)
+    phrases: list[str] = []
+    sentences: list[str] = []
+    for paragraph in paragraphs(raw):
+        if paragraph.startswith("Неоднозначный фрагмент"):
+            phrases.extend(left or right for left, right in re.findall(r"«([^»]+)»|„([^“]+)“", paragraph))
+        else:
+            sentences.append(" ".join(paragraph.split()))
+    return highlight(" ".join(sentences), phrases)
+
+
+def docx_table(widths: tuple[int, ...], fill: str, size_pt: int, headers: tuple[str, ...], rows: list[list[str]]) -> str:
+    columns = ", ".join(f"{width}fr" for width in widths)
+    header = ",\n      ".join(
+        "table.cell(fill: rgb(\"#%s\"), align: left + top)[#text(weight: \"bold\")[%s]]" % (fill, escape(title))
+        for title in headers
+    )
     lines = [
-        "#block(breakable: false)[",
-        "  #set text(size: 9pt)",
-        "  #pz-table(",
-        f"    [{inline(caption)}],",
-        f"    ({columns}),",
+        "#[",
+        f"  #set text(size: {size_pt}pt)",
+        "  #set par(justify: false, first-line-indent: (amount: 0pt, all: true), leading: 0.65em, spacing: 0.4em)",
+        "  #table(",
+        f"    columns: ({columns}),",
+        "    stroke: 0.5pt,",
+        "    inset: 4pt,",
+        "    align: left + top,",
         "    table.header(",
-        "      " + ", ".join(f"[{inline(cell)}]" for cell in header) + ",",
+        "      repeat: true,",
+        f"      {header},",
         "    ),",
     ]
-    for row in data:
+    width = len(headers)
+    for row in rows:
         padded = row + [""] * (width - len(row))
-        lines.append(
-            "    "
-            + ", ".join(
-                f"table.cell(breakable: false)[{inline(cell)}]" for cell in padded[:width]
-            )
-            + ","
+        cells = ", ".join(
+            f"table.cell(align: left + top, breakable: false)[{body}]" for body in padded[:width]
         )
+        lines.append(f"    {cells},")
     lines.extend(["  )", "]"])
     return "\n".join(lines)
+
+
+def step_rows(section: str, path: Path) -> list[list[str]]:
+    rows = markdown_table(section, path)
+    return [[inline(cell) for cell in row] for row in rows[1:]]
+
+
+def action_items(markdown: str) -> list[str]:
+    return [inline(line.strip()[2:].strip()) for line in markdown.splitlines() if line.strip().startswith("- ")]
 
 
 def load_actors(path: Path) -> list[tuple[dict[str, str], dict[str, str], Path]]:
@@ -199,7 +308,7 @@ def load_notes(directory: Path, expected_type: str) -> list[tuple[dict[str, str]
     return notes
 
 
-def requirement_block(meta: dict[str, str], parts: dict[str, str], path: Path) -> str:
+def require_parts(meta: dict[str, str], parts: dict[str, str], path: Path) -> None:
     needed = (
         "Исходная формулировка",
         "Вопрос владельцу продукта",
@@ -211,29 +320,11 @@ def requirement_block(meta: dict[str, str], parts: dict[str, str], path: Path) -
     missing = [name for name in needed if name not in parts]
     if missing:
         raise SystemExit(f"{path.name}: нет секции «{missing[0]}»")
-    heading = meta.get("заголовок") or path.stem
-    return "\n".join([
-        f"== {meta['id']}. {escape(heading)}",
-        "",
-        f"Группа: {inline(meta['группа'])}. Актор: {inline(meta['актор'])}.",
-        "",
-        "#подпись[Исходная формулировка]",
-        "#удалить" + content_block(callout(parts["Исходная формулировка"], "удалить", path)),
-        "",
-        "#подпись[Вопрос владельцу продукта]",
-        "#вопрос" + content_block(callout(parts["Вопрос владельцу продукта"], "вопрос", path)),
-        "",
-        "#подпись[Ответ владельца продукта, предложенный командой]",
-        "#ответ" + content_block(callout(parts["Ответ владельца продукта"], "ответ", path)),
-        "",
-        "#подпись[Новая формулировка]",
-        "#формулировка" + content_block(callout(parts["Новая формулировка"], "формулировка", path)),
-        "",
-        table_block(parts["Шаг 1"], f"{meta['id']}. Шаг 1, исходное предложение", path),
-        "",
-        table_block(parts["Шаг 2"], f"{meta['id']}. Шаг 2, активный залог", path),
-        "",
-    ])
+
+
+def group_label(meta: dict[str, str]) -> str:
+    group = meta["группа"]
+    return group[:1].upper() + group[1:]
 
 
 def write(name: str, text: str) -> None:
@@ -270,56 +361,70 @@ def main() -> None:
         "",
         blocks(brief["Этапы"]),
         "",
-        "Критерии ясности и проверяемости взяты по Вигерсу и Битти @wiegers2014. Пятиколоночная таблица и переход к активному залогу следуют алгоритму Липко @lipko2014. Контекст формализации требований описан в препринте ИСП РАН @kulyamin2006.",
+        "Критерии ясности и проверяемости взяты по Вигерсу и Битти. Пятиколоночная таблица и переход к активному залогу следуют алгоритму Липко. Контекст формализации требований описан в препринте ИСП РАН.",
         "",
     ]))
 
+    verify_rows: list[list[str]] = []
+    step1_rows: list[list[str]] = []
+    step2_rows: list[list[str]] = []
+    for meta, parts, path in requirements:
+        require_parts(meta, parts, path)
+        verify_rows.append([
+            escape(group_label(meta)),
+            original_cell(parts["Исходная формулировка"], path),
+            colored(plain_text(callout(parts["Вопрос владельцу продукта"], "вопрос", path)), QUESTION),
+            colored(plain_text(callout(parts["Ответ владельца продукта"], "ответ", path)), ANSWER),
+            colored(plain_text(callout(parts["Новая формулировка"], "формулировка", path)), FORMULATION, bold=True),
+        ])
+        step1_rows.extend(step_rows(parts["Шаг 1"], path))
+        step2_rows.extend(step_rows(parts["Шаг 2"], path))
+
     verification = [
         "// Собран скриптом скрипты/собрать-отчёт-01.py из заметок требований.",
-        '#import "../../includes/common.typ": pz-table',
-        "",
-        '#let удалить(body) = text(fill: rgb("#C00000"), body)',
-        '#let вопрос(body) = text(fill: rgb("#2E75B6"), body)',
-        '#let ответ(body) = text(fill: rgb("#548235"), body)',
-        '#let формулировка(body) = text(fill: rgb("#1F4E79"), weight: "bold", body)',
-        "#let подпись(название) = {",
-        "  set par(first-line-indent: 0pt)",
-        '  block(above: 0.8em, below: 0.2em, text(style: "italic", fill: luma(80), название))',
-        "}",
+        "// Таблицы повторяют сетку сданного docx: альбомный лист, TableGrid, цвета ячеек.",
+        LANDSCAPE,
         "",
         "= Верификация исходных требований",
         "",
-        "Цветовое кодирование задания сохранено в тексте требований.",
+        "Цветовое кодирование совпадает со сданным отчётом. "
+        + f'#text(fill: rgb("{RED}"))[Красным] выделены фрагменты, которые предлагается удалить или уточнить. '
+        + f'#text(fill: rgb("{QUESTION}"))[Голубым] записаны вопросы владельцу продукта. '
+        + f'#text(fill: rgb("{ANSWER}"))[Зелёным] записаны ответы, предложенные командой: владелец продукта их ещё не подтвердил. '
+        + f'#text(fill: rgb("{FORMULATION}"), weight: "bold")[Синим полужирным] дана новая формулировка требования.',
         "",
-        "#удалить[Красным выделены фрагменты, которые предлагается удалить или уточнить.]",
+        docx_table(VERIFY_WIDTHS, "D9EAF7", 7, VERIFY_HEADERS, verify_rows),
         "",
-        "#вопрос[Голубым записаны вопросы владельцу продукта.]",
+        "== Табличное представление требований, шаг 1",
         "",
-        "#ответ[Зелёным записаны ответы, предложенные командой. Владелец продукта их ещё не подтвердил.]",
+        docx_table(STEP1_WIDTHS, "E2F0D9", 8, STEP_HEADERS, step1_rows),
         "",
-        "#формулировка[Синим полужирным дана новая формулировка требования.]",
+        "== Табличное представление требований, шаг 2",
+        "",
+        docx_table(STEP2_WIDTHS, "FFF2CC", 8, STEP_HEADERS, step2_rows),
         "",
     ]
-    for meta, parts, path in requirements:
-        verification.append(requirement_block(meta, parts, path))
     write("верификация.typ", "\n".join(verification))
+
+    actor_rows: list[list[str]] = []
+    for meta, parts, path in actors:
+        items = action_items(parts["Действия"])
+        if not items:
+            raise SystemExit(f"{path.name}: у «{meta.get('имя', '')}» нет действий")
+        bullets = " \\\n".join(f"• {item}" for item in items)
+        actor_rows.append([escape(meta.get("имя", path.stem)), bullets])
 
     actor_lines = [
         "// Собран скриптом скрипты/собрать-отчёт-01.py из заметок акторов.",
+        LANDSCAPE,
+        "",
         "= Лист акторов и их действия",
         "",
         "Рабочая точка – уникальное подлежащее после перевода требования в активный залог. Веб-сайт и система здесь обозначают саму проектируемую систему.",
         "",
+        docx_table(ACTOR_WIDTHS, "E2F0D9", 9, ("Актер", "Действия"), actor_rows),
+        "",
     ]
-    for meta, parts, path in actors:
-        if "Действия" not in parts:
-            raise SystemExit(f"{path.name}: нет секции «Действия»")
-        actor_lines.extend([
-            f"== {escape(meta.get('имя', path.stem))}",
-            "",
-            blocks(parts["Действия"]),
-            "",
-        ])
     write("акторы.typ", "\n".join(actor_lines))
 
     write("заключение.typ", "\n".join([

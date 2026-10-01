@@ -19,10 +19,6 @@
   subject: meta.subject,
   city: meta.city,
   year: int(meta.year),
-  performers: (
-    (name: "Карев Д. В.", position: "студент"),
-    (name: "Коновалов Д. Р.", position: "студент"),
-  ),
   hide-title: true,
 )
 
@@ -31,8 +27,6 @@
 #set figure.caption(separator: pz-figure-caption-separator)
 
 #pz-title-page(meta)
-
-#include "аннотация.typ"
 
 #set outline(indent: 1.25cm / 2)
 #outline()
@@ -44,5 +38,3 @@
 #include "верификация.typ"
 #include "акторы.typ"
 #include "заключение.typ"
-
-#bibliography("источники.bib")

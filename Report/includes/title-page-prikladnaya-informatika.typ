@@ -4,7 +4,9 @@
 #import "title-page-common.typ": (
   pz-title-grade-block,
   pz-title-header,
+  pz-title-pair,
   pz-title-performers-block,
+  pz-title-sig-row,
   pz-title-work-block,
 )
 
@@ -63,14 +65,42 @@
 
       pz-title-work-block(work-type, discipline, topic, variant)
 
-      // Выполнил/Принял – по центру между темой и блоком оценки.
+      // Исполнители на этом бланке, без отдельного листа пакета gost.
+      let students = meta.at("students", default: none)
       v(1fr)
-      pz-title-performers-block(
-        student-name,
-        student-position,
-        reviewer-name,
-        reviewer-position,
-      )
+      if type(students) == array and students.len() > 0 {
+        pad(x: 0.4cm)[
+          #set align(left)
+          #set par(first-line-indent: 0pt, leading: 14pt, spacing: 0pt)
+          #set block(spacing: 0pt)
+          #stack(
+            dir: ttb,
+            spacing: 22pt,
+            pz-title-pair(
+              [Выполнил],
+              stack(
+                dir: ttb,
+                spacing: 8pt,
+                ..students.map(person => pz-title-sig-row(
+                  [#person.position],
+                  person.name,
+                )),
+              ),
+            ),
+            pz-title-pair(
+              [Принял],
+              pz-title-sig-row([#reviewer-position], reviewer-name),
+            ),
+          )
+        ]
+      } else {
+        pz-title-performers-block(
+          student-name,
+          student-position,
+          reviewer-name,
+          reviewer-position,
+        )
+      }
       v(1fr)
 
       // Оценка – отдельно у низа, над «Таганрог».
