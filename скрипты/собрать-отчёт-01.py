@@ -138,13 +138,15 @@ QUESTION = "#00B0F0"
 ANSWER = "#00A000"
 FORMULATION = "#0000FF"
 
-# Ширины колонок из сданного docx, twip. На альбомном A4 с полями 15 мм это та же сетка.
-VERIFY_WIDTHS = (1780, 3340, 3340, 3340, 3340)
-STEP1_WIDTHS = (1660, 3367, 2128, 3066, 4917)
-STEP2_WIDTHS = (3536, 1639, 2775, 3921, 3267)
+# Ширины колонок из сданного docx, twip. Первая колонка – номер требования.
+ID_WIDTH = 1050
+VERIFY_WIDTHS = (ID_WIDTH, 1780, 3340, 3340, 3340, 3340)
+STEP1_WIDTHS = (ID_WIDTH, 1660, 3367, 2128, 3066, 4917)
+STEP2_WIDTHS = (ID_WIDTH, 3536, 1639, 2775, 3921, 3267)
 ACTOR_WIDTHS = (3707, 11431)
 
 VERIFY_HEADERS = (
+    "№",
     "Группа",
     "Исходное требование (красным – уточняемые фразы)",
     "Вопрос владельцу продукта",
@@ -152,12 +154,14 @@ VERIFY_HEADERS = (
     "Новая формулировка требования",
 )
 STEP_HEADERS = (
+    "№",
     "Словосочетание вначале предложения",
     "Подлежащее",
     "Сказуемое",
     "Дополнение",
     "Словосочетание в конце предложения",
 )
+REQ_TAIL = re.compile(r"\s*[—–-]\s*(?:\[[^\]]+\]\([^)]+\)|REQ-\d+)\s*$")
 
 LANDSCAPE = """#set page(
   flipped: true,
@@ -234,12 +238,22 @@ def original_cell(section: str, path: Path) -> str:
     return highlight(" ".join(sentences), phrases)
 
 
-def docx_table(widths: tuple[int, ...], fill: str, size_pt: int, headers: tuple[str, ...], rows: list[list[str]]) -> str:
+def docx_table(
+    widths: tuple[int, ...],
+    fill: str,
+    size_pt: int,
+    headers: tuple[str, ...],
+    rows: list[list[str]],
+    center_first: bool = False,
+) -> str:
     columns = ", ".join(f"{width}fr" for width in widths)
-    header = ",\n      ".join(
-        "table.cell(fill: rgb(\"#%s\"), align: left + top)[#text(weight: \"bold\")[%s]]" % (fill, escape(title))
-        for title in headers
-    )
+    header_cells = []
+    for index, title in enumerate(headers):
+        align = "center + horizon" if center_first and index == 0 else "left + top"
+        header_cells.append(
+            "table.cell(fill: rgb(\"#%s\"), align: %s)[#text(weight: \"bold\")[%s]]" % (fill, align, escape(title))
+        )
+    header = ",\n      ".join(header_cells)
     lines = [
         "#[",
         f"  #set text(size: {size_pt}pt)",
@@ -257,21 +271,30 @@ def docx_table(widths: tuple[int, ...], fill: str, size_pt: int, headers: tuple[
     width = len(headers)
     for row in rows:
         padded = row + [""] * (width - len(row))
-        cells = ", ".join(
-            f"table.cell(align: left + top, breakable: false)[{body}]" for body in padded[:width]
-        )
+        cells = []
+        for index, body in enumerate(padded[:width]):
+            align = "center + horizon" if center_first and index == 0 else "left + top"
+            cells.append(f"table.cell(align: {align}, breakable: false)[{body}]")
+        cells = ", ".join(cells)
         lines.append(f"    {cells},")
     lines.extend(["  )", "]"])
     return "\n".join(lines)
 
 
-def step_rows(section: str, path: Path) -> list[list[str]]:
+def step_rows(section: str, path: Path, req_id: str) -> list[list[str]]:
     rows = markdown_table(section, path)
-    return [[inline(cell) for cell in row] for row in rows[1:]]
+    number = escape(req_id)
+    return [[number, *[inline(cell) for cell in row]] for row in rows[1:]]
 
 
 def action_items(markdown: str) -> list[str]:
-    return [inline(line.strip()[2:].strip()) for line in markdown.splitlines() if line.strip().startswith("- ")]
+    items = []
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("- "):
+            continue
+        items.append(inline(REQ_TAIL.sub("", stripped[2:].strip())))
+    return items
 
 
 def load_actors(path: Path) -> list[tuple[dict[str, str], dict[str, str], Path]]:
@@ -370,15 +393,17 @@ def main() -> None:
     step2_rows: list[list[str]] = []
     for meta, parts, path in requirements:
         require_parts(meta, parts, path)
+        req_id = meta["id"]
         verify_rows.append([
+            escape(req_id),
             escape(group_label(meta)),
             original_cell(parts["Исходная формулировка"], path),
             colored(plain_text(callout(parts["Вопрос владельцу продукта"], "вопрос", path)), QUESTION),
             colored(plain_text(callout(parts["Ответ владельца продукта"], "ответ", path)), ANSWER),
             colored(plain_text(callout(parts["Новая формулировка"], "формулировка", path)), FORMULATION, bold=True),
         ])
-        step1_rows.extend(step_rows(parts["Шаг 1"], path))
-        step2_rows.extend(step_rows(parts["Шаг 2"], path))
+        step1_rows.extend(step_rows(parts["Шаг 1"], path, req_id))
+        step2_rows.extend(step_rows(parts["Шаг 2"], path, req_id))
 
     verification = [
         "// Собран скриптом скрипты/собрать-отчёт-01.py из заметок требований.",
@@ -393,15 +418,15 @@ def main() -> None:
         + f'#text(fill: rgb("{ANSWER}"))[Зелёным] записаны ответы, предложенные командой: владелец продукта их ещё не подтвердил. '
         + f'#text(fill: rgb("{FORMULATION}"), weight: "bold")[Синим полужирным] дана новая формулировка требования.',
         "",
-        docx_table(VERIFY_WIDTHS, "D9EAF7", 7, VERIFY_HEADERS, verify_rows),
+        docx_table(VERIFY_WIDTHS, "D9EAF7", 7, VERIFY_HEADERS, verify_rows, center_first=True),
         "",
         "== Табличное представление требований, шаг 1",
         "",
-        docx_table(STEP1_WIDTHS, "E2F0D9", 8, STEP_HEADERS, step1_rows),
+        docx_table(STEP1_WIDTHS, "E2F0D9", 8, STEP_HEADERS, step1_rows, center_first=True),
         "",
         "== Табличное представление требований, шаг 2",
         "",
-        docx_table(STEP2_WIDTHS, "FFF2CC", 8, STEP_HEADERS, step2_rows),
+        docx_table(STEP2_WIDTHS, "FFF2CC", 8, STEP_HEADERS, step2_rows, center_first=True),
         "",
     ]
     write("верификация.typ", "\n".join(verification))
