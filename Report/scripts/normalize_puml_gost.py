@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Приводит fig_*.puml к оформлению под ГОСТ: !include темы, без title и локальных skinparam."""
+"""Приводит fig_*.puml к оформлению под ГОСТ: !include темы, без title и легенды.
+
+Цвета элементов сохраняются. Остаются linetype, nodesep, ranksep, defaultTextAlignment, dpi, monochrome и !pragma.
+"""
 from __future__ import annotations
 
 import re
@@ -7,6 +10,10 @@ from pathlib import Path
 
 PUML_DIR = Path(__file__).resolve().parents[1] / "puml"
 INCLUDE_LINE = "!include _gost-theme.inc.puml\n"
+LAYOUT_SKIN = re.compile(
+    r"^skinparam\s+(linetype|nodesep|ranksep|defaultTextAlignment|dpi|monochrome)\b",
+    re.IGNORECASE,
+)
 
 
 def strip_title_and_skinparam(text: str) -> str:
@@ -17,6 +24,10 @@ def strip_title_and_skinparam(text: str) -> str:
         line = lines[i]
         stripped = line.strip()
         if stripped.startswith("skinparam"):
+            if LAYOUT_SKIN.match(stripped) and "{" not in stripped:
+                out.append(line)
+                i += 1
+                continue
             if "{" in stripped and "}" not in stripped:
                 i += 1
                 while i < len(lines) and "}" not in lines[i]:
@@ -54,7 +65,7 @@ def normalize_file(path: Path) -> bool:
     original = text
     text = strip_title_and_skinparam(text)
     if INCLUDE_LINE.strip() not in text:
-        m = re.match(r"(@startuml\s+\S+\s*\n)", text)
+        m = re.match(r"(@startuml[^\n]*\n)", text)
         if m:
             text = text[: m.end()] + INCLUDE_LINE + text[m.end() :]
     text = re.sub(r"\n{3,}", "\n\n", text)

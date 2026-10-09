@@ -4,6 +4,7 @@
 
 ```bash
 make отчёт-01
+make отчёт-02
 ```
 
-PDF: `Report/reports/01-верификация/report.pdf`.
+PDF: `Report/reports/01-верификация/report.pdf`, `Report/reports/02-моделирование/report.pdf`.

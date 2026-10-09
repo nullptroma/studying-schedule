@@ -17,7 +17,7 @@
 
 - `plantuml-gost.cfg` — ч/б, без тени, прозрачный фон (флаг `-config` в `render_puml.sh`)
 - `_gost-theme.inc.puml` — подключается в каждый `fig_*.puml`
-- `scripts/normalize_puml_gost.py` — убирает локальные `skinparam`/`title` перед рендером
+- `scripts/normalize_puml_gost.py` — убирает `title`, легенду и оформительские `skinparam`. Цвета элементов, `monochrome` и параметры раскладки сохраняются
 
 ```bash
 ./scripts/render_puml.sh   # puml/fig_*.puml → images/fig_*.png

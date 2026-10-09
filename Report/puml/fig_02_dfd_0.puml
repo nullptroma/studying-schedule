@@ -1,0 +1,56 @@
+@startuml
+!include _gost-theme.inc.puml
+skinparam dpi 144
+skinparam monochrome false
+!pragma layout elk
+skinparam nodesep 18
+skinparam ranksep 22
+skinparam defaultTextAlignment center
+left to right direction
+
+rectangle "Студент" as Student #D9EAF7
+rectangle "Преподаватель" as Teacher #D9EAF7
+rectangle "Администратор" as Admin #D9EAF7
+
+rectangle "1.0\nВедение\nисходных данных" as P1 #D9EAD3
+rectangle "2.0\nФормирование\nрасписания" as P2 #D9EAD3
+rectangle "3.0\nПроверка\nи публикация" as P3 #D9EAD3
+rectangle "4.0\nПросмотр\nрасписания" as P4 #D9EAD3
+rectangle "5.0\nОбработка\nзаявок" as P5 #D9EAD3
+
+database "D1\nПользователи" as D1 #FFF2CC
+database "D2\nУчебные\nданные" as D2 #FFF2CC
+database "D3\nАудитории" as D3 #FFF2CC
+database "D4\nОграничения" as D4 #FFF2CC
+database "D5\nВерсии\nрасписания" as D5 #FFF2CC
+database "D6\nЗаявки" as D6 #FFF2CC
+
+Admin --> P1 : исходные данные
+P1 --> D1
+P1 --> D2
+P1 --> D3
+P1 --> D4
+D2 --> P2
+D3 --> P2
+D4 --> P2
+P2 --> D5 : проект
+D5 --> P3
+D4 --> P3
+Admin --> P3 : публикация
+P3 --> D5
+P3 --> Admin : конфликты
+Student --> P4 : запрос
+Teacher --> P4 : запрос
+D5 --> P4
+P4 --> Student : группа
+P4 --> Teacher : личное
+Teacher --> P5 : заявка
+Admin --> P5 : решение
+D6 --> P5
+D5 --> P5
+D3 --> P5
+D4 --> P5
+P5 --> D6
+P5 --> Teacher : статус
+P5 --> P2 : изменение
+@enduml

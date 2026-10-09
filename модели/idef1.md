@@ -1,0 +1,267 @@
+---
+тип: модель
+порядок: 4
+рисунок: fig_02_idef1
+подпись: Информационная модель IDEF1 системы управления учебным расписанием
+метка: fig-idef1
+файл: idef1.typ
+tags:
+  - модель
+  - отчёт-2
+---
+
+# Информационная модель IDEF1
+
+Сущности, атрибуты и связи предметной области. Пунктир — необязательная ссылка заявки на запись расписания, интервал или аудиторию.
+
+## Диаграмма
+
+```plantuml
+@startuml
+skinparam linetype ortho
+skinparam nodesep 16
+skinparam ranksep 18
+skinparam defaultTextAlignment center
+
+top to bottom direction
+
+hide circle
+
+' =========================================================
+' ПОЛЬЗОВАТЕЛИ
+' =========================================================
+
+package "Пользователи системы" #E8F1FA {
+
+    entity "ADMIN\nАдминистратор" as ADMIN #D9EAF7 {
+        * admin_id : bigint <<PK>>
+        --
+        full_name : varchar
+        email : varchar
+    }
+
+    entity "TEACHER\nПреподаватель" as TEACHER #D9EAF7 {
+        * teacher_id : bigint <<PK>>
+        --
+        full_name : varchar
+        email : varchar
+        department : varchar
+    }
+
+    entity "STUDENT\nСтудент" as STUDENT #D9EAF7 {
+        * student_id : bigint <<PK>>
+        --
+        group_id : bigint <<FK>>
+        full_name : varchar
+        email : varchar
+    }
+
+    ADMIN -[hidden]right- TEACHER
+    TEACHER -[hidden]right- STUDENT
+}
+
+' =========================================================
+' УЧЕБНЫЙ ПРОЦЕСС
+' =========================================================
+
+package "Учебный процесс" #EDF6E9 {
+
+    entity "STUDY_GROUP\nУчебная группа" as GROUP #D9EAD3 {
+        * group_id : bigint <<PK>>
+        --
+        name : varchar
+        faculty : varchar
+        student_count : int
+    }
+
+    entity "DISCIPLINE\nДисциплина" as DISCIPLINE #D9EAD3 {
+        * discipline_id : bigint <<PK>>
+        --
+        name : varchar
+    }
+
+    entity "LESSON\nЗанятие" as LESSON #D9EAD3 {
+        * lesson_id : bigint <<PK>>
+        --
+        discipline_id : bigint <<FK>>
+        teacher_id : bigint <<FK>>
+        lesson_type : varchar
+        required_room_type : varchar
+        expected_students : int
+    }
+
+    entity "LESSON_GROUP\nГруппы занятия" as LESSON_GROUP #D9EAD3 {
+        * lesson_id : bigint <<PK, FK>>
+        * group_id : bigint <<PK, FK>>
+    }
+
+    GROUP -[hidden]right- LESSON_GROUP
+    LESSON_GROUP -[hidden]right- LESSON
+    DISCIPLINE -[hidden]down- LESSON
+}
+
+' =========================================================
+' АУДИТОРНЫЙ ФОНД
+' =========================================================
+
+package "Аудиторный фонд" #FFF1E6 {
+
+    entity "BUILDING\nУчебный корпус" as BUILDING #FCE5CD {
+        * building_id : bigint <<PK>>
+        --
+        name : varchar
+        address : varchar
+    }
+
+    entity "ROOM\nАудитория" as ROOM #FCE5CD {
+        * room_id : bigint <<PK>>
+        --
+        building_id : bigint <<FK>>
+        number : varchar
+        capacity : int
+        room_type : varchar
+    }
+
+    BUILDING -[hidden]down- ROOM
+}
+
+' =========================================================
+' ВРЕМЯ И ДОСТУПНОСТЬ
+' =========================================================
+
+package "Время и доступность" #FFF8DC {
+
+    entity "TIME_SLOT\nВременной интервал" as SLOT #FFF2CC {
+        * slot_id : bigint <<PK>>
+        --
+        day_of_week : int
+        start_time : time
+        end_time : time
+    }
+
+    entity "TEACHER_AVAILABILITY\nДоступность преподавателя" as AVAILABILITY #FFF2CC {
+        * availability_id : bigint <<PK>>
+        --
+        teacher_id : bigint <<FK>>
+        slot_id : bigint <<FK>>
+        is_available : boolean
+    }
+
+    SLOT -[hidden]down- AVAILABILITY
+}
+
+' =========================================================
+' РАСПИСАНИЕ
+' =========================================================
+
+package "Расписание" #F3EAF7 {
+
+    entity "SCHEDULE\nРасписание" as SCHEDULE #EAD1DC {
+        * schedule_id : bigint <<PK>>
+        --
+        created_by : bigint <<FK>>
+        semester : varchar
+        status : enum
+        created_at : datetime
+        published_at : datetime
+    }
+
+    entity "SCHEDULE_ENTRY\nЗапись расписания" as ENTRY #EAD1DC {
+        * entry_id : bigint <<PK>>
+        --
+        schedule_id : bigint <<FK>>
+        lesson_id : bigint <<FK>>
+        room_id : bigint <<FK>>
+        slot_id : bigint <<FK>>
+        week_pattern : varchar
+    }
+
+    SCHEDULE -[hidden]down- ENTRY
+}
+
+' =========================================================
+' ОГРАНИЧЕНИЯ И ЗАЯВКИ
+' =========================================================
+
+package "Управление расписанием" #FBE9E7 {
+
+    entity "SCHEDULING_CONSTRAINT\nОграничение" as CONSTRAINT #F4CCCC {
+        * constraint_id : bigint <<PK>>
+        --
+        schedule_id : bigint <<FK>>
+        constraint_type : enum
+        code : varchar
+        description : varchar
+        weight : decimal
+        is_active : boolean
+    }
+
+    entity "CHANGE_REQUEST\nЗаявка на изменение" as REQUEST #F4CCCC {
+        * request_id : bigint <<PK>>
+        --
+        teacher_id : bigint <<FK>>
+        lesson_id : bigint <<FK>>
+        entry_id : bigint <<FK, NULL>>
+        proposed_slot_id : bigint <<FK, NULL>>
+        proposed_room_id : bigint <<FK, NULL>>
+        reviewed_by : bigint <<FK, NULL>>
+        request_type : enum
+        status : enum
+        comment : varchar
+        created_at : datetime
+    }
+
+    CONSTRAINT -[hidden]right- REQUEST
+}
+
+' =========================================================
+' ОСНОВНЫЕ СВЯЗИ
+' =========================================================
+
+GROUP ||--o{ STUDENT
+
+TEACHER ||--o{ LESSON
+DISCIPLINE ||--o{ LESSON
+
+LESSON ||--o{ LESSON_GROUP
+GROUP ||--o{ LESSON_GROUP
+
+BUILDING ||--o{ ROOM
+
+TEACHER ||--o{ AVAILABILITY
+SLOT ||--o{ AVAILABILITY
+
+ADMIN ||--o{ SCHEDULE
+
+SCHEDULE ||--o{ ENTRY
+LESSON ||--o{ ENTRY
+ROOM ||--o{ ENTRY
+SLOT ||--o{ ENTRY
+
+SCHEDULE ||--o{ CONSTRAINT
+
+TEACHER ||--o{ REQUEST
+ADMIN ||--o{ REQUEST
+LESSON ||--o{ REQUEST
+
+' Необязательные ссылки заявки.
+' Обычные линии используются специально,
+' чтобы PlantUML не ломал Crow's Foot синтаксис.
+
+ENTRY .. REQUEST
+SLOT .. REQUEST
+ROOM .. REQUEST
+
+
+legend bottom
+|= Цвет |= Область |
+|<#D9EAF7>| Пользователи |
+|<#D9EAD3>| Учебный процесс |
+|<#FCE5CD>| Аудиторный фонд |
+|<#FFF2CC>| Время и доступность |
+|<#EAD1DC>| Расписание |
+|<#F4CCCC>| Ограничения и заявки |
+endlegend
+
+@enduml
+```
