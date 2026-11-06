@@ -1,0 +1,148 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam dpi 72
+skinparam defaultFontName "Liberation Serif"
+skinparam defaultFontSize 11
+skinparam defaultFontColor black
+skinparam backgroundColor white
+skinparam documentBackgroundColor white
+skinparam ArrowColor black
+skinparam ArrowThickness 1
+skinparam activityStyle rectangle
+skinparam activity {
+  BackgroundColor white
+  BorderColor black
+  FontColor black
+  BorderThickness 1
+  DiamondBackgroundColor white
+  DiamondBorderColor black
+  BarColor black
+}
+skinparam activityDiamond {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor black
+  FontColor black
+}
+skinparam partition {
+  BackgroundColor white
+  BorderColor black
+  FontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam component {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam package {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam cloud {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam actor {
+  BorderColor black
+  FontColor black
+}
+skinparam usecase {
+  BackgroundColor white
+  BorderColor black
+}
+
+skinparam dpi 144
+skinparam monochrome false
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 100
+skinparam defaultTextAlignment center
+
+
+left to right direction
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+skinparam rectangle {
+    RoundCorner 12
+}
+' =========================================================
+' - title Диаграмма прецедентов
+' АКТОРЫ
+' =========================================================
+
+actor "Администратор" as Admin
+actor "Преподаватель" as Teacher
+actor "Студент" as Student
+
+' =========================================================
+' СИСТЕМА
+' =========================================================
+
+rectangle {
+
+    ' Админ
+    usecase "Управлять учебными\nгруппами" as UC_ManageGroups
+    usecase "Управлять аудиториями" as UC_ManageRooms
+    usecase "Сформировать расписание" as UC_Generate
+    usecase "Оптимизировать расписание" as UC_Optimize
+    usecase "Опубликовать расписание" as UC_Publish
+    usecase "Скоректировать расписание" as UC_Adfust
+
+    usecase "Проверить ограничения" as UC_Validate
+    usecase "Минимизировать окна" as UC_Minimize
+    
+    ' Препод
+    usecase "Указать доступность\nпреподавателя" as UC_SetAvailability
+    usecase "Запросить корректировку" as UC_RequestChange
+    usecase "Посмотреть расписание" as UC_View
+
+    ' usecase "Получить статус\nзаявки" as UC_ViewRequestStatus
+    ' usecase "Рассмотреть заявку\nна изменение" as UC_ReviewRequest
+    ' usecase "Принять решение\nпо заявке" as UC_DecideRequest
+
+    ' Связи include / extend
+    UC_Generate -[hidden]-> UC_Validate
+    UC_Optimize -[hidden]-> UC_Validate
+    UC_Optimize -[hidden]-> UC_Minimize
+
+    UC_Generate .> UC_Validate : <<include>>
+    UC_Optimize .> UC_Validate : <<include>>
+    UC_Optimize .> UC_Minimize : <<include>>
+
+    rectangle " " as SPACER #white;line:white
+    UC_View -right.> UC_RequestChange : <<extend>>\nПри обнаружении ошибок
+}
+
+' =========================================================
+' СВЯЗИ АКТОРОВ С ПРЕЦЕДЕНТАМИ
+' =========================================================
+
+Admin --> UC_ManageGroups
+Admin --> UC_ManageRooms
+Admin --> UC_Generate
+Admin --> UC_Optimize
+Admin --> UC_Publish
+Admin --> UC_Adfust
+
+
+Teacher --> UC_SetAvailability
+Teacher --> UC_RequestChange
+Teacher --> UC_View
+
+Student --> UC_View
+@enduml
