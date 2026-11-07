@@ -51,7 +51,7 @@
   3,
   table.header([Инструмент], [Класс], [Версия]),
   [Gaphor], [Среда моделирования], [3.3.2],
-  [Visual Paradigm], [CASE-средство], [Community Edition],
+  [Visual Paradigm], [CASE-средство], [Evaluation Copy, пробный период 30 дней],
   [Microsoft Visio], [Визуальный редактор], [редакция с набором UML],
   [PlantUML], [Генератор из текста], [1.2026.8],
 )
