@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam DefaultFontName DejaVu Sans
+skinparam usecaseBackgroundColor #F1F5FA
+skinparam usecaseBorderColor #31577D
+skinparam ArrowColor #53708B
+title Учебное расписание — диаграмма прецедентов
+actor "Диспетчер" as Dispatcher
+actor "Преподаватель" as Teacher
+actor "Обучающийся" as Student
+actor "Внешняя учебная ИС" as External
+rectangle "ИС «Учебное расписание»" {
+  usecase "UC-01 Вести справочники\nи учебную нагрузку" as UC01
+  usecase "UC-02 Задать ограничения\nи приоритеты" as UC02
+  usecase "UC-03 Сформировать\nпроект расписания" as UC03
+  usecase "UC-04 Проверить\nограничения" as UC04
+  usecase "UC-05 Оценить и\nсократить окна" as UC05
+  usecase "UC-06 Перенести\nзанятие" as UC06
+  usecase "UC-07 Получить варианты\nустранения конфликта" as UC07
+  usecase "UC-08 Утвердить и\nопубликовать версию" as UC08
+  usecase "UC-09 Просмотреть\nрасписание" as UC09
+  usecase "UC-10 Экспортировать\nрасписание" as UC10
+  usecase "UC-11 Сравнить версии\nрасписания" as UC11
+  usecase "UC-12 Отменить\nгенерацию" as UC12
+}
+Dispatcher --> UC01
+Dispatcher --> UC02
+Dispatcher --> UC03
+Dispatcher --> UC06
+Dispatcher --> UC08
+Dispatcher --> UC11
+Dispatcher --> UC12
+Teacher --> UC09
+Teacher --> UC02 : доступность
+Student --> UC09
+External --> UC10
+UC03 ..> UC04 : <<include>>
+UC03 ..> UC05 : <<include>>
+UC06 ..> UC04 : <<include>>
+UC08 ..> UC04 : <<include>>
+UC07 ..> UC06 : <<extend>>
+UC12 ..> UC03 : <<extend>>
+@enduml

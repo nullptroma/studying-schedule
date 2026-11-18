@@ -1,0 +1,30 @@
+@startuml
+skinparam DefaultFontName DejaVu Sans
+skinparam shadowing false
+title Жизненный цикл ScheduleVersion
+state "Черновик" as Draft
+state "Генерация" as Generating
+state "Проверка" as Checking
+state "Готово" as Ready
+state "Опубликовано" as Published
+state "Ошибка" as Error
+state "Отменено" as Canceled
+[*] --> Draft : создать версию / save
+Draft --> Generating : generateDraft() [входные данные заданы] / start
+Generating --> Checking : вариант построен / validateVersion
+Generating --> Error : невозможно разместить все занятия / report
+Generating --> Canceled : cancelGeneration() / abort
+Checking --> Ready : validateVersion() [нет конфликтов и покрыта нагрузка] / score
+Checking --> Error : validateVersion() [есть конфликты] / report
+Error --> Draft : исправить исходные данные / retry
+Ready --> Draft : внести исправление / invalidate
+Ready --> Published : publishVersion() [проверка успешна] / publish
+Draft --> Canceled : отменить проект / cancel
+Ready --> Canceled : отменить проект / cancel
+Published --> [*] : заменить новой опубликованной версией / archive
+Canceled --> [*]
+note right of Published
+  Опубликованную версию не редактируют напрямую.
+  cloneAsDraft() создаёт новую версию «Черновик».
+end note
+@enduml

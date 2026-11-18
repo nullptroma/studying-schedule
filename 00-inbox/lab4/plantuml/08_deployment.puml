@@ -1,0 +1,31 @@
+@startuml
+skinparam DefaultFontName DejaVu Sans
+skinparam shadowing false
+title Развёртывание ИС «Учебное расписание» (проектный вариант)
+node "Рабочее место пользователя" as Client <<device>> {
+  artifact "Веб-браузер\n[Веб-интерфейс]" as Browser
+}
+node "Сервер приложения" as App <<executionEnvironment>> {
+  artifact "API и контроль доступа" as API
+  artifact "Каталог ресурсов" as Cat
+  artifact "Планировщик" as Solver
+  artifact "Проверка ограничений" as Ch
+  artifact "Экспорт/интеграция" as Exp
+}
+node "Сервер БД" as Db <<database>> {
+  database "Реляционная БД" as SQL
+  artifact "Хранилище версий\nрасписания" as Store
+}
+cloud "Внешняя учебная ИС" as Ext
+Browser --> API : HTTPS / REST
+API --> SQL : SQL / TCP (TLS)
+Cat --> SQL : SQL / TCP (TLS)
+Solver --> Ch : внутренний вызов
+Solver --> SQL : SQL / TCP (TLS)
+Exp --> Ext : HTTPS / REST
+Store -- SQL : таблицы версий и занятий
+note bottom of App
+  Размещение модулей на одном сервере — допущение.
+  При росте нагрузки планировщик может быть вынесен.
+end note
+@enduml

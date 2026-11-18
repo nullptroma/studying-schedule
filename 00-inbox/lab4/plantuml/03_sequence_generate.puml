@@ -1,0 +1,50 @@
+@startuml
+skinparam DefaultFontName DejaVu Sans
+skinparam shadowing false
+title UC-03 — Генерация проекта расписания
+actor "Диспетчер" as D
+boundary "ui:ScheduleUI" as UI
+control "service:ScheduleService" as S
+control "checker:ConstraintChecker" as C
+entity "version:ScheduleVersion" as V
+entity "assignment:TeachingAssignment" as A
+D -> UI : requestGeneration(params)
+UI ->> S : generateDraft(params)
+activate S
+create V
+S -> V : <<create>> (status=Генерация)
+loop каждое учебное назначение
+  S -> A : getRemainingHours(V)
+  A --> S : hours
+  loop подбор допустимого слота и аудитории
+    S -> C : validateLesson(candidate, V)
+    C --> S : conflicts
+    alt ограничений нет
+      S -> V : addLesson(candidate)
+    else есть ограничения
+      note over S,C : О-01..О-04: слот отвергается
+    end
+  end
+end
+S -> V : setStatus("Проверка")
+S -> C : validateVersion(V)
+C --> S : conflicts
+alt конфликтов нет и нагрузка покрыта
+  S -> C : calculateGaps(V)
+  C --> S : gapsScore
+  S -> V : setStatus("Готово")
+  S -->> UI : projectReady(V)
+  UI -> D : showSchedule(V.id)
+else решение не найдено
+  S -> V : setStatus("Ошибка")
+  S -->> UI : generationFailed(conflicts)
+  UI -> D : showConflicts(conflicts)
+end
+opt диспетчер отменил вычисление
+  D -> UI : cancelGeneration(V.id)
+  UI -> S : cancelGeneration(V.id)
+  S -> V : setStatus("Отменено")
+end
+note over S,V : БТ-01, БТ-02, ПТ-03, О-01..О-04
+ deactivate S
+@enduml

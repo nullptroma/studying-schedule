@@ -1,0 +1,105 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam DefaultFontName DejaVu Sans
+skinparam classBackgroundColor #F7FAFE
+skinparam classBorderColor #355D81
+skinparam linetype ortho
+title Учебное расписание — диаграмма классов
+abstract class User <<entity>> {
+  -id : UUID
+  -fullName : String
+  -role : String
+  +hasPermission(action : String) : Boolean
+}
+class Dispatcher <<entity>> {
+  +approve(versionId : UUID) : Boolean
+}
+class Teacher <<entity>> {
+  -availability : Set<UUID>
+  +isAvailable(slot : TimeSlot) : Boolean
+  +viewOwnSchedule() : List<Lesson>
+}
+class StudentGroup <<entity>> {
+  -id : UUID
+  -code : String
+  -studentCount : Integer
+  +calculateGaps(lessons : List<Lesson>) : Integer
+}
+class Classroom <<entity>> {
+  -id : UUID
+  -code : String
+  -capacity : Integer
+  -roomType : String
+  +fits(assignment : TeachingAssignment) : Boolean
+}
+class TeachingAssignment <<entity>> {
+  -id : UUID
+  -courseName : String
+  -requiredHours : Integer
+  -requiredRoomType : String
+  +getRemainingHours(version : ScheduleVersion) : Integer
+}
+class TimeSlot <<entity>> {
+  -id : UUID
+  -weekday : Integer
+  -periodNumber : Integer
+  -startsAt : Time
+  -endsAt : Time
+}
+class Lesson <<entity>> {
+  -id : UUID
+  +reschedule(slot : TimeSlot, room : Classroom) : Void
+}
+class ScheduleVersion <<entity>> {
+  -id : UUID
+  -status : String
+  -createdAt : DateTime
+  -gapsScore : Integer
+  +addLesson(lesson : Lesson) : Void
+  +updateLesson(lessonId : UUID, slotId : UUID, roomId : UUID) : Void
+  +setStatus(status : String) : Void
+  +cloneAsDraft() : ScheduleVersion
+}
+class ScheduleUI <<boundary>> {
+  +requestGeneration(params : Map) : Void
+  +requestMove(lessonId : UUID, slotId : UUID, roomId : UUID) : Void
+  +requestPublish(versionId : UUID) : Void
+  +showSchedule(versionId : UUID) : Void
+  +showConflicts(conflicts : List) : Void
+  +cancelGeneration(versionId : UUID) : Void
+  +projectReady(version : ScheduleVersion) : Void
+  +generationFailed(conflicts : List) : Void
+  +moveAccepted(score : Integer) : Void
+  +moveRejected(conflicts : List) : Void
+}
+class ScheduleService <<control>> {
+  +generateDraft(params : Map) : ScheduleVersion
+  +checkVersion(versionId : UUID) : List
+  +moveLesson(lessonId : UUID, slotId : UUID, roomId : UUID) : List
+  +publishVersion(versionId : UUID) : Boolean
+  +cancelGeneration(versionId : UUID) : Void
+}
+class ConstraintChecker <<service>> {
+  +validateLesson(lesson : Lesson, version : ScheduleVersion) : List
+  +validateVersion(version : ScheduleVersion) : List
+  +validateRequiredHours(version : ScheduleVersion) : Boolean
+  +calculateGaps(version : ScheduleVersion) : Integer
+}
+User <|-- Dispatcher
+User <|-- Teacher
+Teacher "1" -- "0..*" TeachingAssignment : выполняет >
+StudentGroup "1" -- "0..*" TeachingAssignment : получает >
+ScheduleVersion "1" *-- "0..*" Lesson : содержит >
+TeachingAssignment "1" -- "0..*" Lesson : реализуется >
+TimeSlot "1" -- "0..*" Lesson : назначен >
+Classroom "1" -- "0..*" Lesson : размещает >
+ScheduleUI ..> ScheduleService : вызывает >
+Dispatcher "1" -- "0..*" ScheduleVersion : утверждает >
+ScheduleService ..> ScheduleVersion : создаёт >
+ScheduleService ..> ConstraintChecker : проверяет >
+ConstraintChecker ..> Lesson : анализирует >
+ConstraintChecker ..> Teacher : учитывает доступность >
+ConstraintChecker ..> StudentGroup : учитывает окна >
+ConstraintChecker ..> Classroom : проверяет вместимость >
+@enduml
