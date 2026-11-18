@@ -1,0 +1,121 @@
+@startuml
+!include _gost-theme.inc.puml
+skinparam dpi 144
+skinparam monochrome false
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+skinparam classAttributeIconSize 0
+hide circle
+
+abstract class User <<entity>> #D9EAD3 {
+  -id : UUID
+  -fullName : String
+  -email : String
+  -role : String
+  +hasPermission(action : String) : Boolean
+}
+class Administrator <<entity>> #D9EAD3 {
+  -position : String
+}
+class Teacher <<entity>> #D9EAD3 {
+  -department : String
+  -availability : Set<TimeSlot>
+  +isAvailable(slot : TimeSlot) : Boolean
+}
+class StudentGroup <<entity>> #D9EAD3 {
+  -id : UUID
+  -name : String
+  -faculty : String
+  -studentCount : Integer
+}
+class Classroom <<entity>> #D9EAD3 {
+  -id : UUID
+  -number : String
+  -capacity : Integer
+  -roomType : String
+  -buildingName : String
+  -buildingAddress : String
+  +fits(assignment : TeachingAssignment) : Boolean
+}
+class TeachingAssignment <<entity>> #D9EAD3 {
+  -id : UUID
+  -courseName : String
+  -lessonType : String
+  -requiredHours : Integer
+  -requiredRoomType : String
+  +getRemainingHours(version : ScheduleVersion) : Integer
+}
+class TimeSlot <<entity>> #D9EAD3 {
+  -id : UUID
+  -weekday : Integer
+  -periodNumber : Integer
+  -startsAt : Time
+  -endsAt : Time
+}
+class Lesson <<entity>> #D9EAD3 {
+  -id : UUID
+  -weekPattern : String
+  +reschedule(slot : TimeSlot, room : Classroom) : Void
+}
+class ScheduleVersion <<entity>> #D9EAD3 {
+  -id : UUID
+  -semester : String
+  -status : String
+  -createdAt : DateTime
+  -publishedAt : DateTime
+  -gapsScore : Integer
+  +addLesson(lesson : Lesson) : Void
+  +updateLesson(lessonId : UUID, slotId : UUID, roomId : UUID) : Void
+  +setStatus(status : String) : Void
+  +cloneAsDraft() : ScheduleVersion
+}
+class ScheduleUI <<boundary>> #D9EAF7 {
+  -language : String
+  +requestGeneration(params : Map) : Void
+  +cancelGeneration(versionId : UUID) : Void
+  +requestMove(lessonId : UUID, slotId : UUID, roomId : UUID) : Void
+  +requestPublish(versionId : UUID) : Void
+  +showSchedule(versionId : UUID) : Void
+  +showGroupSchedule(groupId : UUID, date : Date) : Void
+  +showConflicts(conflicts : List) : Void
+  +projectReady(version : ScheduleVersion) : Void
+  +generationFailed(conflicts : List) : Void
+  +moveAccepted(gapsScore : Integer) : Void
+  +moveRejected(conflicts : List) : Void
+  +published(version : ScheduleVersion) : Void
+  +publishRejected(reasons : List) : Void
+}
+class ScheduleService <<control>> #FCE5CD {
+  +generateDraft(params : Map) : ScheduleVersion
+  +cancelGeneration(versionId : UUID) : Void
+  +moveLesson(lessonId : UUID, slotId : UUID, roomId : UUID) : List
+  +checkVersion(versionId : UUID) : List
+  +publishVersion(versionId : UUID) : Boolean
+}
+class ConstraintChecker <<service>> #FFF2CC {
+  +validateLesson(lesson : Lesson, version : ScheduleVersion) : List
+  +validateVersion(version : ScheduleVersion) : List
+  +validateRequiredHours(version : ScheduleVersion) : Boolean
+  +calculateGaps(version : ScheduleVersion) : Integer
+}
+
+User <|-- Administrator
+User <|-- Teacher
+
+ScheduleUI ..> ScheduleService : вызывает >
+ScheduleService ..> ScheduleVersion : создаёт >
+ScheduleService ..> ConstraintChecker : проверяет >
+
+Administrator "1" -- "0..*" ScheduleVersion : публикует >
+Teacher "1" -- "0..*" TeachingAssignment : ведёт >
+StudentGroup "1..*" -- "0..*" TeachingAssignment : получает >
+ScheduleVersion "1" *-- "0..*" Lesson : содержит >
+TeachingAssignment "1" -- "0..*" Lesson : реализуется >
+TimeSlot "1" -- "0..*" Lesson : назначен >
+Classroom "1" -- "0..*" Lesson : размещает >
+
+ConstraintChecker ..> Lesson : анализирует >
+ConstraintChecker ..> Teacher : доступность >
+ConstraintChecker ..> Classroom : вместимость >
+@enduml

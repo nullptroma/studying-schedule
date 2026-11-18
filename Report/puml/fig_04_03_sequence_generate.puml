@@ -1,0 +1,64 @@
+@startuml
+!include _gost-theme.inc.puml
+skinparam dpi 144
+skinparam monochrome false
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 220
+
+actor "Администратор" as D
+boundary "ui:ScheduleUI" as UI #D9EAF7
+control "service:ScheduleService" as S #FCE5CD
+control "checker:ConstraintChecker" as C #FFF2CC
+entity "version:ScheduleVersion" as V #D9EAD3
+entity "assignment:TeachingAssignment" as A #D9EAD3
+
+D -> UI : requestGeneration(params)
+UI ->> S : generateDraft(params)
+activate S
+UI --> D : статус «Генерация»
+create V
+S -> V : <<create>> status = «Генерация»
+
+loop для каждого учебного назначения
+  break получен cancelGeneration(versionId)
+    D -> UI : cancelGeneration(versionId)
+    UI -> S : cancelGeneration(versionId)
+    S -> V : setStatus(«Отменено»)
+    S -->> UI : generationFailed([«отменено»])
+  end
+  S -> A : getRemainingHours(version)
+  A --> S : hours
+  loop пока hours > 0 и есть слоты
+    S -> C : validateLesson(candidate, version)
+    C --> S : conflicts
+    alt conflicts пуст
+      S -> V : addLesson(candidate)
+    else есть нарушения
+      note right of C : О-04…О-06: кандидат отвергается
+    end
+  end
+end
+
+S -> V : setStatus(«Проверка»)
+S -> C : validateVersion(version)
+C --> S : conflicts
+S -> C : validateRequiredHours(version)
+C --> S : covered
+
+alt конфликтов нет и нагрузка покрыта
+  S -> C : calculateGaps(version)
+  C --> S : gapsScore
+  S -> V : setStatus(«Готово»)
+  S -->> UI : projectReady(version)
+  UI -> UI : showSchedule(versionId)
+  UI --> D : проект расписания
+else решение не найдено
+  S -> V : setStatus(«Ошибка»)
+  S -->> UI : generationFailed(conflicts)
+  UI -> UI : showConflicts(conflicts)
+  UI --> D : причины и непокрытые часы
+end
+deactivate S
+
+note over S, V : БТ-02, БТ-03, ПТ-03, ПТ-04, СХ-05
+@enduml

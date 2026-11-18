@@ -32,9 +32,10 @@ if [[ -f "$GOST_CFG" ]]; then
 fi
 
 shopt -s nullglob
-PUML_FILES=("$PUML_DIR"/fig_*.puml)
+PUML_GLOB="${PUML_GLOB:-fig_*.puml}"
+PUML_FILES=("$PUML_DIR"/$PUML_GLOB)
 if ((${#PUML_FILES[@]} == 0)); then
-  echo "No fig_*.puml in $PUML_DIR" >&2
+  echo "No $PUML_GLOB in $PUML_DIR" >&2
   exit 1
 fi
 

@@ -1,0 +1,48 @@
+@startuml
+!include _gost-theme.inc.puml
+skinparam dpi 144
+skinparam monochrome false
+skinparam componentStyle uml2
+skinparam nodesep 35
+skinparam ranksep 45
+
+package "Клиент" #EEF5FC {
+  component "Веб-интерфейс\n[ScheduleUI]" as UI #D9EAF7
+}
+
+package "Сервер приложения" #FFF8EE {
+  interface "IPlanningApi" as IPlan
+  component "API и контроль доступа\n[User, Administrator, Teacher]" as Access #FCE5CD
+  component "Планировщик\n[ScheduleService]" as Solver #FCE5CD
+  interface "ICatalog" as ICat
+  interface "IConstraints" as ICons
+  interface "IScheduleStore" as IStore
+  component "Каталог ресурсов\n[StudentGroup, Classroom,\nTeachingAssignment, TimeSlot]" as Catalog #D9EAD3
+  component "Проверка ограничений\n[ConstraintChecker]" as Checker #FFF2CC
+  component "Хранилище версий\n[ScheduleVersion, Lesson]" as Storage #D9EAD3
+  component "Экспорт" as Export #D9EAF7
+  interface "IExport" as IExp
+  note "БТ-02, БТ-03: сначала жёсткие\nограничения, затем окна" as NSolver
+  note "О-01: правка только\nадминистратору" as NAccess
+}
+
+component "Внешняя учебная ИС" as Ext <<external>>
+
+UI -down-( IPlan : HTTPS / REST
+IPlan -down- Access
+Access -down-( ICat
+Access -right-> Solver : запуск расчёта
+Solver -down-( ICons
+Solver -down-( IStore
+ICat -down- Catalog
+ICons -down- Checker
+Checker -left-( ICat
+IStore -down- Storage
+Export -up-( IStore
+Export -down- IExp
+Ext -up-( IExp
+NSolver .up. Solver
+NAccess .left. Access
+
+note right of UI : СХ-01…СХ-04, ПТ-09
+@enduml

@@ -1,0 +1,62 @@
+@startuml
+!include _gost-theme.inc.puml
+skinparam dpi 144
+skinparam monochrome false
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 220
+
+actor "Администратор" as D
+boundary "ui:ScheduleUI" as UI #D9EAF7
+control "service:ScheduleService" as S #FCE5CD
+control "checker:ConstraintChecker" as C #FFF2CC
+entity "version:ScheduleVersion" as V #D9EAD3
+entity "lesson:Lesson" as L #D9EAD3
+entity "teacher:Teacher" as T #D9EAD3
+entity "room:Classroom" as R #D9EAD3
+
+D -> UI : requestMove(lessonId, slotId, roomId)
+UI -> S : moveLesson(lessonId, slotId, roomId)
+activate S
+opt версия в статусе «Опубликовано»
+  S -> V : cloneAsDraft()
+  V --> S : draft
+  note right of S : О-07: правится только черновик
+end
+
+S -> C : validateLesson(candidate, version)
+activate C
+C -> T : isAvailable(slot)
+T --> C : available
+C -> R : fits(assignment)
+R --> C : fits
+C --> S : conflicts
+deactivate C
+
+alt кандидат допустим
+  S -> V : updateLesson(lessonId, slotId, roomId)
+  V -> L : reschedule(slot, room)
+  S -> V : setStatus(«Проверка»)
+  S -> C : validateVersion(version)
+  C --> S : conflicts
+  alt версия без нарушений
+    S -> C : calculateGaps(version)
+    C --> S : gapsScore
+    S -> V : setStatus(«Готово»)
+    S --> UI : moveAccepted(gapsScore)
+    UI -> UI : showSchedule(versionId)
+  else найдены иные нарушения
+    V -> L : reschedule(prevSlot, prevRoom)
+    S -> V : setStatus(«Черновик»)
+    S --> UI : moveRejected(conflicts)
+    UI -> UI : showConflicts(conflicts)
+  end
+else слот занят или аудитория не подходит
+  S --> UI : moveRejected(conflicts)
+  UI -> UI : showConflicts(conflicts)
+  note right of UI : UC-07: варианты устранения конфликта
+end
+deactivate S
+UI --> D : результат переноса
+
+note over C, R : ПТ-05, О-04…О-06, КП-04
+@enduml

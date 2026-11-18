@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Приводит fig_*.puml к оформлению под ГОСТ: !include темы, без title и легенды.
 
-Цвета элементов сохраняются. Остаются linetype, nodesep, ranksep, defaultTextAlignment, dpi, monochrome и !pragma.
+Цвета элементов сохраняются. Остаются linetype, nodesep, ranksep, defaultTextAlignment, dpi, monochrome,
+classAttributeIconSize, componentStyle, sequenceMessageAlign, maxMessageSize и !pragma.
 """
 from __future__ import annotations
 
@@ -11,7 +12,8 @@ from pathlib import Path
 PUML_DIR = Path(__file__).resolve().parents[1] / "puml"
 INCLUDE_LINE = "!include _gost-theme.inc.puml\n"
 LAYOUT_SKIN = re.compile(
-    r"^skinparam\s+(linetype|nodesep|ranksep|defaultTextAlignment|dpi|monochrome)\b",
+    r"^skinparam\s+(linetype|nodesep|ranksep|defaultTextAlignment|dpi|monochrome"
+    r"|classAttributeIconSize|componentStyle|sequenceMessageAlign|maxMessageSize)\b",
     re.IGNORECASE,
 )
 

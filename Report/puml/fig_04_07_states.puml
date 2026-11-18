@@ -1,0 +1,32 @@
+@startuml
+!include _gost-theme.inc.puml
+skinparam dpi 144
+skinparam monochrome false
+hide empty description
+
+state "Черновик" as Draft #D9EAF7
+state "Генерация" as Generating #FFF2CC
+state "Проверка" as Checking #FFF2CC
+state "Готово" as Ready #D9EAD3
+state "Опубликовано" as Published #D9EAD3
+state "Архив" as Archived
+state "Ошибка" as Error #F4CCCC
+state "Отменено" as Canceled #F4CCCC
+
+[*] --> Draft : создать версию / save
+Draft --> Generating : generateDraft() [данные заданы] / запуск расчёта
+Generating --> Checking : вариант построен / validateVersion()
+Generating --> Error : [занятия не размещены] / отчёт о причинах
+Generating --> Canceled : cancelGeneration() / прервать расчёт
+Checking --> Ready : [нет конфликтов, нагрузка покрыта] / calculateGaps()
+Checking --> Error : [есть конфликты] / showConflicts()
+Error --> Draft : исправить данные / повторить
+Ready --> Checking : moveLesson() / validateVersion()
+Ready --> Published : publishVersion() [права и проверка] / publish
+Ready --> Canceled : отменить проект
+Draft --> Canceled : отменить проект
+Published --> Draft : cloneAsDraft() / новая версия
+Published --> Archived : опубликована новая версия / archive
+Archived --> [*]
+Canceled --> [*]
+@enduml
